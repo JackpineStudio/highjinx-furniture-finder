@@ -6,7 +6,7 @@ Highjinx needs an internal app for finding free furniture postings on the intern
 - Create an app that scrapes free furniture postings from:
 [Kijiji Ottawa and closeby regions](http://ottawa.kijiji.ca/)
 , [Craigslist Ottawa and closeby regions](http://ottawa.en.craigslist.ca/), [Used Ottawa](http://www.usedottawa.com/)
-
+- Scrape the RSS feeds from these websites
 - Create an email notifier for new findings. 
 - Create an interface for easy access to the history of findings.
 - Information Filter
