@@ -9,16 +9,15 @@ var feeds = ['http://ottawa.kijiji.ca/f-SearchAdRss?AdType=2&CatId=235&Location=
 		, 'http://www.usedottawa.com/index.rss?category=household'];
 
 function loadFeed(feed) {
-		var feed_url = feeds[x];
-		var response = rss.parseURL(feed_url, function(articles) {
-			for (var i = 0; i < articles.length; i++) {
-				//var item = articles[i];
-				//var object = new SaleObject(item.title, item.link, item.description, item.image, item.pubDate);
-				//items[i] = object;
-				console.log(articles[i]);
-				console.log();
-			}
-		});
+//		var response = rss.parseURL(feed, function(articles) {
+//			for (var article in articles) {
+//				var item = article;
+//				var object = new SaleObject(item.title, item.link, item.description, item.image, item.pubDate);
+//				items.push(object);
+//				console.log(article);
+//				console.log();
+//			}
+//		});
 }
 
 function loadFeedsIntoArray(items, feed_url) {
