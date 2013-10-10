@@ -1,17 +1,7 @@
-var http = require('http')
-	, FeedParser = require('feedparser')
-	, request('request')
-	;
+var FeedParser = require('feedparser')
+	, request = require('request');
 
-http.createServer(function (req, res) {
-  res.writeHead(200, {'Content-Type': 'text/plain'});
-  res.end('Hello World\n');
-}).listen(1337, '127.0.0.1');
-console.log('Server running at http://127.0.0.1:1337/');
-
-request('http://ottawa.kijiji.ca/f-SearchAdRss?CatId=235&Location=1700184').on('error', function (error) {
-	console.error(error);
-	})
+request('http://ottawa.kijiji.ca/f-SearchAdRss?CatId=235&Location=1700184')
   .pipe(new FeedParser())
   .on('error', function (error) {
     console.error(error);
@@ -21,7 +11,7 @@ request('http://ottawa.kijiji.ca/f-SearchAdRss?CatId=235&Location=1700184').on('
   })
   .on('readable', function() {
     var stream = this, item;
-    while (item = stream.read()) {
+    while (item == stream.read()) {
       console.log('Got article: %s', item.title || item.description);
     }
   });

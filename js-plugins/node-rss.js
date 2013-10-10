@@ -83,7 +83,7 @@ var parser = new xml.SaxParser(function(cb) {
 	if(in_item) {
 	    current_chars += chars;
 	}
-    };
+    }
 
     // @TODO handle warnings and errors properly
     cb.onWarning(function(msg) {

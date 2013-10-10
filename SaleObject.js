@@ -38,7 +38,6 @@ function SaleObject(title, link, description, image, pubDate) {
 	this.toString = function() {
 		return this.title + " \n" + this.link + " \n" + this.description + " \n" + this.image + " \n" + this.pubDate;
 	};
-};
-
+}
 
 module.exports = SaleObject;

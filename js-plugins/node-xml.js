@@ -290,7 +290,7 @@ XMLP.prototype._parseNamespacesAndAtts = function (atts){
 
 XMLP.prototype._getContextualNamespace = function (prefix){
     if(prefix !== ''){
-        for(item in this.m_namespaceList){
+        for(var item in this.m_namespaceList){
             item = this.m_namespaceList[item];
             if(item.prefix === prefix){
                 return item.uri;
