@@ -30,7 +30,6 @@ function loadFeed(feed) {
 				console.log();
 			}
 		});
-
 	}
 }
 
