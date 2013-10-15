@@ -8,7 +8,7 @@ request('http://ottawa.kijiji.ca/f-SearchAdRss?CatId=235&Location=1700184')
   })
   .on('meta', function (meta) {
     console.log('%s', meta.title);
-    listItems(meta);
+    //listItems(meta);
   })
   .on('readable', function() {
     var stream = this, item = null;
