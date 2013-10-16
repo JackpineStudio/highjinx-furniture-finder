@@ -15,38 +15,38 @@ function loadFeed(feed) {
 		count++;
 		console.log("\n________________________________________\n     ---- ==== <<< " + count + " >>>> ==== ----\n");
 		console.log(feed);
-		if(count > 1){
+		//if(JSON.stringify(articles[0]).indexOf("[ title:") !== -1){
 			for (var a in articles){
 				var article = articles[a];
-				//if(typeof(article) === 'object'){
-					if(article.description.indexOf("<table") != -1){
-						var desc = JSON.stringify(article.description);
-						var fIndex = desc.indexOf("<center>"),
-							lIndex = desc.length;
-						desc = desc.substring(fIndex, lIndex);
-						fIndex = desc.indexOf("<img src=\"");
-						if(fIndex !== -1){
-							lIndex = desc.indexOf("</center>");
-							article.image = desc.substring(fIndex, lIndex - 1);
-							fIndex = lIndex;
-						}else{
-							article.image = "none";
-							fIndex = desc.indexOf("</center>");
-						}
-						lIndex = desc.length;
-						desc = desc.substring(fIndex, lIndex);
-						fIndex = desc.indexOf("<td>");
-						lIndex = desc.indexOf("<a href=") === -1? desc.indexOf("<A HREF="): desc.indexOf("<a href=");
-						desc = desc.substring(fIndex + 4, lIndex);
-						article.description = desc;
-					}
-					var object = new SaleObject(article.title, article.link, article.description, article.image);
-					items.push(object);
-					console.log(object.toString());
+				if(typeof(article) === 'object'){
+//					if(article.description.indexOf("<table") != -1){
+//						var desc = article.description;
+//						var fIndex = desc.indexOf("<img src="),
+//							lIndex = desc.indexOf("</center>");
+//						if(fIndex !== -1){
+//							article.image = desc.substring(fIndex + 11, lIndex - 3);
+//							fIndex = lIndex;
+//						}else{
+//							fIndex = desc.indexOf("</center>");
+//							article.image = "none";
+//						}
+//						lIndex = desc.length;
+//						desc = desc.substring(fIndex, lIndex);
+//						fIndex = desc.indexOf("<td>");
+//						lIndex = desc.indexOf("<a href=") === -1? desc.indexOf("<A HREF="): desc.indexOf("<a href=");
+//						desc = desc.substring(fIndex + 4, lIndex);
+//						article.description = desc;
+//					}else{
+//						article.image = "none";
+//					}
+//					var object = new SaleObject(article.title, article.link, article.description, article.image);
+//					items.push(object);
+//					console.log(object.toString());
+					console.log(article);
 					console.log("\n");
-				//}
+				}
 			}
-		}
+		//}
 		console.log("\n     ---- ==== <<< " + count + " >>>> ==== ----\n________________________________________\n");
 	});
 	console.log(number);
