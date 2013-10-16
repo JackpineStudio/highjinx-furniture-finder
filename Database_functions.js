@@ -69,9 +69,20 @@ exports.insertIntoDatabase = function(objects) {
 			var sqlQuery = "INSERT into SaleObjects (title, link, description, imageLink) values(?, ?, ?, ?)";
 			var query = connection.query(sqlQuery, [object.tile, object.title, object.description, object.imageLink], function(err, result) {
 			});
+			console.log(query.sql);
 		};
 	};
-}
+};
+
+exports.insertSingleItemIntoDatabase = function(object) {
+	if (connection == null)
+		connectToDatabase();
+	if (object != null) {
+		var sqlQuery = "INSERT into SaleObjects (title, link, description, imageLink) values(?, ?, ?, ?)";
+		var query = connection.query(sqlQuery, [object.getTitle(), object.getLink(), object.getDescription(), object.getImage()], function(err, result) {
+		});	
+	};
+};
 
 exports.getObjectsFromDatabase = function(objects) {
 	if (connection == null)
@@ -88,14 +99,14 @@ exports.getObjectsFromDatabase = function(objects) {
 		endConnection();
 	});
 	
-	
 };
 
 
-function endConnection() {
+exports.endConnection = function() {
 	if (connection != null)
 		connection.end();
-}
+};
+
 
 
 
