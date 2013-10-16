@@ -2,18 +2,11 @@
  * SaleObject.js
  */
 
-var title;
-var link;
-var description;
-var image;
-var pubDate;
-
-function SaleObject(title, link, description, image, pubDate) {
+function SaleObject(title, link, description, image) {
 	this.title = title;
 	this.link = link;
 	this.description = description;
 	this.image = image;
-	this.pubDate = pubDate;
 	
 	this.getTitle = function() {
 		return this.title;
@@ -31,12 +24,12 @@ function SaleObject(title, link, description, image, pubDate) {
 		return this.image;
 	};
 
-	this.getPubDate = function() {
-		return this.pubDate;
-	};
+//	this.getPubDate = function() {
+//		return this.pubDate;
+//	};
 
 	this.toString = function() {
-		return this.title + " \n" + this.link + " \n" + this.description + " \n" + this.image + " \n" + this.pubDate;
+		return this.title + " \n" + this.link + " \n" + this.description + " \n" + this.image;// + " \n" + this.pubDate;
 	};
 }
 

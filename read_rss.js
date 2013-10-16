@@ -14,15 +14,37 @@ function loadFeed(feed) {
 	var response = rss.parseURL(feed, function(articles) {
 		count++;
 		console.log("\n________________________________________\n     ---- ==== <<< " + count + " >>>> ==== ----\n");
-		if(count >= 4){
+		console.log(feed);
+		if(count > 1){
 			for (var a in articles){
 				var article = articles[a];
-				if(typeof(article) === 'object'){
-					var object = new SaleObject(article.title, article.link, article.description, article.image, article.pubDate);
+				//if(typeof(article) === 'object'){
+					if(article.description.indexOf("<table") != -1){
+						var desc = JSON.stringify(article.description);
+						var fIndex = desc.indexOf("<center>"),
+							lIndex = desc.length;
+						desc = desc.substring(fIndex, lIndex);
+						fIndex = desc.indexOf("<img src=\"");
+						if(fIndex !== -1){
+							lIndex = desc.indexOf("</center>");
+							article.image = desc.substring(fIndex, lIndex - 1);
+							fIndex = lIndex;
+						}else{
+							article.image = "none";
+							fIndex = desc.indexOf("</center>");
+						}
+						lIndex = desc.length;
+						desc = desc.substring(fIndex, lIndex);
+						fIndex = desc.indexOf("<td>");
+						lIndex = desc.indexOf("<a href=") === -1? desc.indexOf("<A HREF="): desc.indexOf("<a href=");
+						desc = desc.substring(fIndex + 4, lIndex);
+						article.description = desc;
+					}
+					var object = new SaleObject(article.title, article.link, article.description, article.image);
 					items.push(object);
-					console.log(article);
-					console.log(typeof(article));
-				}
+					console.log(object.toString());
+					console.log("\n");
+				//}
 			}
 		}
 		console.log("\n     ---- ==== <<< " + count + " >>>> ==== ----\n________________________________________\n");
@@ -38,6 +60,6 @@ function saveToDatabase() {
 	
 }
 
-for (var f in feeds){
-	loadFeed(feeds[f]);
-}
+//for (var f in feeds){
+	loadFeed(feeds[2]);
+//}
