@@ -24,10 +24,6 @@ function SaleObject(title, link, description, image) {
 		return this.image;
 	};
 
-//	this.getPubDate = function() {
-//		return this.pubDate;
-//	};
-
 	this.toString = function() {
 		return this.title + " \n" + this.link + " \n" + this.description + " \n" + this.image;// + " \n" + this.pubDate;
 	};
