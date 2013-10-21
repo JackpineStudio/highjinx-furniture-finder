@@ -14,7 +14,7 @@ connectionDetails['database'] = "highjinx-database";
 var pool = null;
 var connection = null;
 function createPool() {
-	if (pool === null) {
+	if (pool == null) {
 		pool = mysql.createPool({
 			host : connectionDetails['host'],
 			user : connectionDetails['user'],
@@ -23,7 +23,7 @@ function createPool() {
 		});
 	}
 	
-	if (pool !== null) 
+	if (pool != null) 
 		console.log("Created pool succesfully!");
 }
 
@@ -44,7 +44,7 @@ function connectToDatabase() {
 
 //Executes a query that gets the Count(*) from SaleObjects table
 function getCount() {
-	if (connection === null)
+	if (connection == null)
 		connectToDatabase();
 	var sqlQuery = 'SELECT count(*) FROM SaleObjects';	
 	var query = connection.query(sqlQuery);
@@ -61,20 +61,20 @@ function getCount() {
 
 // objects is an array of SaleObject
 exports.insertIntoDatabase = function(objects) {
-	if (connection === null)
+	if (connection == null)
 		connectToDatabase();
-	if (objects !== null) {
+	if (objects != null) {
 		for (var i = 0; i < objects.length; i++) {
 			var object = objects[i];
 			var sqlQuery = "INSERT into SaleObjects (title, link, description, imageLink) values(?, ?, ?, ?)";
 			var query = connection.query(sqlQuery, [object.tile, object.title, object.description, object.imageLink], function(err, result) {
 			});
-		}
-	}
-};
+		};
+	};
+}
 
 exports.getObjectsFromDatabase = function(objects) {
-	if (connection === null)
+	if (connection == null)
 		connectToDatabase();
 	var sqlQuery = 'SELECT * FROM SaleObjects ORDER BY dateAdded DESC';	
 	var query = connection.query(sqlQuery);
@@ -93,7 +93,7 @@ exports.getObjectsFromDatabase = function(objects) {
 
 
 function endConnection() {
-	if (connection !== null)
+	if (connection != null)
 		connection.end();
 }
 
