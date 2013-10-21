@@ -56,6 +56,25 @@ function getCount() {
 	});	
 }
 
+function exists(object) {
+	if (connection == null)
+		connectToDatabase();
+	
+	var sqlQuery = 'SELECT count(*) FROM SaleObjects WHERE link = ?';	
+	var query = connection.query(sqlQuery, [object.link]);
+	var count = -1;
+	query
+	.on('result', function(row){
+		count = row['count(*)'];
+	})
+	.on('end', function() {
+		console.log("Count is " + count);
+		if (count != 0)
+			exists =  true;
+		exists =  false;
+	});	
+}
+
 // objects is an array of SaleObject
 exports.insertIntoDatabase = function(objects) {
 	if (connection == null)
@@ -75,8 +94,24 @@ exports.insertSingleItemIntoDatabase = function(object) {
 	if (connection == null)
 		connectToDatabase();
 	if (object != null) {
-		var sqlQuery = "INSERT into SaleObjects (title, link, description, imageLink) values(?, ?, ?, ?)";
-		var query = connection.query(sqlQuery, [object.getTitle(), object.getLink(), object.getDescription(), object.getImage()], function(err, result) {
+		
+		var sqlQuery = 'SELECT count(*) FROM SaleObjects WHERE link = ?';	
+		var query = connection.query(sqlQuery, [object.link]);
+		var count = -1;
+		query
+		.on('result', function(row){
+			count = row['count(*)'];
+		})
+		.on('end', function() {
+			if (count == 0) {
+				var sqlQuery = "INSERT into SaleObjects (title, link, description, imageLink) values(?, ?, ?, ?)";
+				var query = connection.query(sqlQuery, [object.getTitle(), object.getLink(), object.getDescription(), object.getImage()]);
+				query.on('end' ,function() {
+					console.log("Succesfully inserted item into the database");
+				});	
+			}else {
+				console.log("This item exists in the database");
+			}			
 		});	
 	};
 };
@@ -96,14 +131,40 @@ exports.getObjectsFromDatabase = function(objects, callback) {
 		connection.end();
 		callback(objects);
 	});	
-	
-	
 };
 
+exports.updateDatabase = function(callback) {
+	if (connection == null)
+		connectToDatabase();
+	var count = -1;
+	var sqlQuery = 'SELECT count(*) FROM SaleObjects WHERE dateAdded < DATE_SUB(NOW(), INTERVAL 24 HOUR);'
+	var query = connection.query(sqlQuery);
+	query
+	.on('result', function(row) {
+		count = row['count(*)'];
+	})
+	.on ('end', function() {
+		if (count != 0)
+			deleteOldEntries(callback);
+		else {
+			console.log('No need to delete');
+			callback();
+		}
+	});
+};
+
+function deleteOldEntries(callback) {
+	if (connection == null)
+		connectToDatabase();
+	var sqlQuery = 'DELETE FROM SaleObjects WHERE dateAdded < DATE_SUB(NOW(), INTERVAL 24 HOUR);';
+	var query = connection.query(sqlQuery);
+	query
+	.on('end', function() {
+		console.log("Done deleting from database");
+		callback();
+	});
+}
 exports.closeConnection = function() {
 	console.log("Closing connection");
 };
-
-
-
 

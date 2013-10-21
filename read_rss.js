@@ -11,12 +11,13 @@ var rss = require('./js-plugins/node-rss'),
 	count = 0;
 
 var databaseHandler = require('./Database_functions');
+
+
 function loadFeed(feed) {
 	var response = rss.parseURL(feed, function(articles) {
-		count++;
-		//console.log("\n________________________________________\n     ---- ==== <<< " + count + " >>>> ==== ----\n");
-		for(var a = 0; a < articles.length; a++){
-			var article = articles[a];
+		console.log("Updating database");
+		for(var i = 0; i < articles.length; i++){
+			var article = articles[i];
 			if(article.description.indexOf("<table") != -1){
 				var desc = article.description;
 				var fIndex = desc.indexOf("<img src="),
@@ -42,7 +43,6 @@ function loadFeed(feed) {
 			if (isFree(article.title))
 				databaseHandler.insertSingleItemIntoDatabase(object);
 		}
-		console.log("\n     ---- ==== <<< " + count + " >>>> ==== ----\n________________________________________\n");
 	});
 }
 
@@ -86,6 +86,13 @@ function getImageLink(link) {
 	});	
 }
 
+function loadFeeds() {
+	for (var i = 0 ; i < feeds.length; i ++) {
+		loadFeed(feeds[i]);
+	}
+}
+
+
 function print(objects) {
 	console.log("Loaded: " + objects.length + " items");
 }
@@ -93,7 +100,6 @@ function print(objects) {
 function generateScript() {
 	var objects = new Array();
 	databaseHandler.getObjectsFromDatabase(objects, print);
-	
 }
 
-generateScript();
+databaseHandler.updateDatabase(loadFeeds);
