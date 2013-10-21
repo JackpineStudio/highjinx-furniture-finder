@@ -22,7 +22,6 @@ function createPool() {
 			database : connectionDetails['database'],
 		});
 	}
-	
 	if (pool != null) 
 		console.log("Created pool succesfully!");
 }
@@ -39,7 +38,6 @@ function connectToDatabase() {
 			console.log('Cannot connect to the database');
 		});
 	});
-	
 }
 
 //Executes a query that gets the Count(*) from SaleObjects table
@@ -55,8 +53,7 @@ function getCount() {
 	})
 	.on('end', function() {
 		
-	});
-	
+	});	
 }
 
 // objects is an array of SaleObject
@@ -84,7 +81,7 @@ exports.insertSingleItemIntoDatabase = function(object) {
 	};
 };
 
-exports.getObjectsFromDatabase = function(objects) {
+exports.getObjectsFromDatabase = function(objects, callback) {
 	if (connection == null)
 		connectToDatabase();
 	var sqlQuery = 'SELECT * FROM SaleObjects ORDER BY dateAdded DESC';	
@@ -96,15 +93,15 @@ exports.getObjectsFromDatabase = function(objects) {
 	})
 	.on('end', function() {
 		console.log("At the end objects contain " + objects.length);
-		endConnection();
-	});
+		connection.end();
+		callback(objects);
+	});	
+	
 	
 };
 
-
-exports.endConnection = function() {
-	if (connection != null)
-		connection.end();
+exports.closeConnection = function() {
+	console.log("Closing connection");
 };
 
 

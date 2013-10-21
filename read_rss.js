@@ -35,27 +35,15 @@ function loadFeed(feed) {
 				desc = desc.substring(fIndex + 4, lIndex);
 				article.description = desc;
 			}else{
-				//article.image = "none";
+				article.image = "none";
 			}
 			var object = new SaleObject(article.title, article.link, article.description, article.image);
-			
-			if (object.getImage() == null && object.getLink().indexOf("kijiji") != -1) {
-				getImageLink(object.getLink());
-			}
 			items.push(object);
-			//console.log(object.toString());
-			//console.log("\n");
-			//if (isFree(article.title))
-			//	databaseHandler.insertSingleItemIntoDatabase(object);
+			if (isFree(article.title))
+				databaseHandler.insertSingleItemIntoDatabase(object);
 		}
-		//console.log("\n     ---- ==== <<< " + count + " >>>> ==== ----\n________________________________________\n");
-		
+		console.log("\n     ---- ==== <<< " + count + " >>>> ==== ----\n________________________________________\n");
 	});
-	
-}
-
-function loadFeedsIntoArray(items, feed_url) {
-	
 }
 
 function isFree(title) {
@@ -95,15 +83,17 @@ function getImageLink(link) {
 		}else {
 			console.log("Error getting image");
 		}
-	});
-	
+	});	
+}
+
+function print(objects) {
+	console.log("Loaded: " + objects.length + " items");
+}
+
+function generateScript() {
+	var objects = new Array();
+	databaseHandler.getObjectsFromDatabase(objects, print);
 	
 }
 
-for (var f = 0; f < feeds.length; f++){
-	loadFeed(feeds[f]);
-}
-
-databaseHandler.endConnection();
-
-//getImageLink('http://ottawa.kijiji.ca/c-buy-and-sell-furniture-chairs-recliners-Free-Chairs-W0QQAdIdZ533887290');
+generateScript();
