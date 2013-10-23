@@ -9,13 +9,22 @@ var rss = require('./js-plugins/node-rss'),
 	         'http://ottawa.en.craigslist.ca/fua/index.rss',
 			 'http://www.usedottawa.com/index.rss?category=furniture'],
 	count = 0;
+	fs = require('fs');
+
+var events = require('events'),
+	util = require('util');
+var eventEmitter = new events.EventEmitter();
 
 var databaseHandler = require('./Database_functions');
 
+var finishedLoading = false;
 
-function loadFeed(feed) {
+var count = 0;
+var total = -1;
+
+function loadFeed(feed, callback, increment, passedCount) {
 	var response = rss.parseURL(feed, function(articles) {
-		console.log("Updating database");
+		var count = 0;
 		for(var i = 0; i < articles.length; i++){
 			var article = articles[i];
 			if(article.description.indexOf("<table") != -1){
@@ -39,11 +48,16 @@ function loadFeed(feed) {
 				article.image = "none";
 			}
 			var object = new SaleObject(article.title, article.link, article.description, article.image);
-			items.push(object);
-			if (isFree(article.title))
+			count++;
+			if (isFree(article.title)) {
+				items.push(object);
 				databaseHandler.insertSingleItemIntoDatabase(object);
+			}
 		}
 	});
+	/*if (databaseHandler != null) {
+		databaseHandler.addUpdate();
+	}*/
 }
 
 function isFree(title) {
@@ -86,20 +100,101 @@ function getImageLink(link) {
 	});	
 }
 
-function loadFeeds() {
-	for (var i = 0 ; i < feeds.length; i ++) {
-		loadFeed(feeds[i]);
+function loadFeeds(callback) {
+	eventEmitter.on('doneArticles', function() {
+		console.log("Calling done");
+		console.log("Items length: " + items.length);
+		total = total + items.length;
+		databaseHandler.insertIntoDatabase(items);
+		items = new Array();
+	});
+	
+	var totalCount = -1;
+	
+	for (var i = 0; i < feeds.length; i++) {
+		loadFeed(feeds[i], callback, false, totalCount);
 	}
+	
 }
 
+function emitEnd() {
+	eventEmitter.emit('end');
+}
 
 function print(objects) {
 	console.log("Loaded: " + objects.length + " items");
 }
 
-function generateScript() {
-	var objects = new Array();
-	databaseHandler.getObjectsFromDatabase(objects, print);
+function generateHTML(objects, response) {
+	var fileName = "./index.html";
+	
+	var str = "<!DOCTYPE HTML>\n"
+				+"<html>\n"
+				+	"<head>\n"
+				+	'<link rel="stylesheet" type="text/css" href="style.css"/>'
+				+	"<title>Furniture Finder</title>\n"
+				+ "</head>"
+				+ "<body>";
+	for (var i = 0; i < objects.length; i++) {
+		var obj = objects[i];
+		var objStr = '<div class="item">\n' + "<h2>" + obj.getTitle() + "</h2>" + "<p>" + obj.getDescription() + "</p>" + '<a href="' + obj.getLink() + '">Link</a>' + "</div>\n";
+		str = str + objStr;
+	}
+	var footer = "</body>\n</html>";
+	str = str + footer;
+	fs.writeFile(fileName, str, function(err) {
+		if (err) {
+			console.log(err);
+		} else {
+			console.log("Wrote to file")
+		}
+	});
+	
 }
 
-databaseHandler.updateDatabase(loadFeeds);
+function generateFile() {
+	var objects = new Array();
+	databaseHandler.getObjectsFromDatabase(objects, generateHTML);
+}
+
+function generateScript(response) {
+	var objects = new Array();
+	databaseHandler.getObjectsFromDatabaseWithResponse(objects, generateHTML, response);
+}
+
+var http = require('http');
+
+var extensions = {".html" : "text/html", ".css" : "text/css" };
+
+function onRequest(request, response) {
+	var fileName = "index.html";
+	fs.readFile(fileName, "binary", function(err, file) {
+		response.writeHead(200);
+		response.write(file, "binary");
+		response.end();
+	});
+}
+
+function writeToResponse(response, str) {
+	response.write(str);
+}
+
+function checkCount(event, count, num) {
+	if (count == num) {
+		eventEmitter.emit(event);
+	}
+}
+
+var fn = 2;
+if (fn == 0)
+	generateFile();
+else if (fn == 1)
+	http.createServer(onRequest).listen(8888);
+else if (fn == 2) 
+	databaseHandler.updateDatabase(loadFeeds);
+else if (fn == 3) {
+	databaseHandler.insertIntoDatabase(objects);
+}else if (fn == 4) {
+	preLoadFeeds();
+}
+

@@ -121,6 +121,7 @@ exports.parseFile = function(file, cb) {
  * 
  * @TODO - decent error checking
  */
+
 exports.parseURL = function(url, cb) {
 	var parser = initializeParser();
 	callback = cb;
@@ -184,5 +185,6 @@ exports.parseURL = function(url, cb) {
 			}
 		});
 		request.end();
+		
 	}
 };
