@@ -22,6 +22,11 @@ var finishedLoading = false;
 var count = 0;
 var total = -1;
 
+/*
+ * This function loads rss feeds from the feeds array.
+ * Each rss item, if it is free creates a SaleObject.
+ * The SaleObject(s) are then pushed into the items array.
+ */
 function loadFeed(feed, callback, increment, passedCount) {
 	var response = rss.parseURL(feed, function(articles) {
 		var count = 0;
@@ -60,6 +65,10 @@ function loadFeed(feed, callback, increment, passedCount) {
 	}*/
 }
 
+/*
+ * This function checks whether the item is free or not according to presence of a dollar sign.
+ * Also filters the WANTED items. 
+ */
 function isFree(title) {
 	if (title.indexOf("$") != -1)
 		return false;
@@ -67,6 +76,11 @@ function isFree(title) {
 		return false;
 	return true;
 }
+
+/*
+ * This function is for getting the image source by creating a get request with the link provided.
+ * It first Kijiji's source's code. Not tested for other websites
+ */
 
 function getImageLink(link) {
 	var request = require('request');

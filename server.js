@@ -1,5 +1,5 @@
 /**
- * New node file
+ * server.js
  */
 
 var http = require('http');

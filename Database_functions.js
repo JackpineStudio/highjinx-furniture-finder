@@ -1,5 +1,6 @@
 /**
- * New node file
+ * Database_functions.js
+ * This module contains functions needed to access the database 
  */
 
 var mysql = require('mysql');
@@ -44,8 +45,9 @@ function connectToDatabase() {
 		});
 	});
 }
-
-// This function executes a query that gets the Count(*) from SaleObjects table
+/*
+ * This function executes a query that gets the Count(*) from SaleObjects table
+ */
 function getCount() {
 	if (connection == null)
 		connectToDatabase();
