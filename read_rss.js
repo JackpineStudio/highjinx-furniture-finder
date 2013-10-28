@@ -199,7 +199,11 @@ function checkCount(event, count, num) {
 	}
 }
 
-var fn = 2;
+exports.generateFiles = function() {
+	generateFile();
+}
+
+var fn = 0;
 if (fn == 0)
 	generateFile();
 else if (fn == 1)

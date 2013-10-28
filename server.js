@@ -24,3 +24,46 @@ function writeToResponse(response, str) {
 	response.write(str);
 }
 
+
+var dirName = "./";
+
+//readFeeds.generateFiles();
+
+var connect = require('connect');
+
+var path = require('path');
+
+var app  = connect()
+	.use(connect.static(dirName + "index.html"))
+	.use(function(request, response) { 
+		
+		var filePath = '.' + request.url;
+		if (filePath == './')
+			filePath = './index.html';
+		
+		var extname = path.extname(filePath);
+		var contentType = 'text/html';
+		switch (extname) {
+				case '.css':
+					contentType = 'text/css';
+					break;
+		}
+		
+		fs.exists(filePath, function(exists) {
+			if (exists) {
+				fs.readFile(filePath, function(error, content) {
+					if (error) {
+						response.writeHead(500);
+						response.end();
+					} else {
+						response.writeHead(200, {'Content-Type' : contentType});
+						response.end(content, 'utf-8');
+					}
+				});
+			} else {
+				response.writeHead(404);
+				response.end();
+			}
+		});		
+	});
+http.createServer(app).listen(8080);
