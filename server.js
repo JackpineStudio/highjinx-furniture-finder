@@ -31,9 +31,11 @@ function writeToResponse(response, str) {
 
 function update() {
 	// Call update on read-rss.js
-	// set lastUpdated
-	lastUpdated = new Date();
 	console.log("Updating...");
+	// set lastUpdated
+	//readFeeds.generateFiles();
+	lastUpdated = new Date();
+	console.log("Updated database");
 }
 
 function readFromConfigFile() {
@@ -51,14 +53,49 @@ function changeConfigFile() {
 
 }
 
-function setInterval() {
+function changeInterval() {
+	rl.question("Enter an interval Days:Hours:Minutes: ", function(answer) {
+		var numbers = answer.split(":");
+		
+		var days = numbers[0];
+		var hours = numbers[1];
+		var minutes = numbers[2];
+		var newInterval = new Date("October " + days + " ,2013 " + hours + ":" + minutes + ":" + "00");
+		setInterval(newInterval);
+	});
+	
+}
 
+//DD:HH:MM
+function setInterval(newInterval) {
+	updateInterval = newInterval;
+
+	var days = updateInterval.getDate();
+	var hours = updateInterval.getHours();
+	var minutes = updateInterval.getMinutes()
+	
+	var dayString = " day";
+	var hourString = " hour";
+	var minuteString = " minute";
+
+	if (days > 1 || days == 0)
+		dayString += "s";
+	if (hours > 1 || hours == 0)
+		hourString += "s";
+	if (minutes > 1 || minutes == 0)
+		minuteString += "s";
+
+	dayString += " ";
+	hourString += " ";
+	minuteString += " ";
+
+	console.log("Database will update in "  + days + dayString +   + hours + hourString + minutes + minuteString);  
+	showMenu();
 }
 
 function checkUpdate() {
 	var now = new Date();
 	var now2 = new Date();
-	//now.setHours(15);
 	
 	var nowDay = now.getDate();
 	var nowHours = now.getHours();
@@ -72,14 +109,27 @@ function checkUpdate() {
 	var hourDiff = nowHours - lastUpdatedHours;
 	var minuteDiff = nowMinutes - lastUpdatedMinutes;
 
-	var decide = updateInterval.getMinutes();
+	var decide = updateInterval.getHours();
 	console.log(dayDiff + ":"  + hourDiff + ":" + minuteDiff);
-	if (minuteDiff == decide)
+	if (hourDiff == decide)
 	{
 		console.log("Time to update");
-		process.exit(code=0);
+		return true;
 	} 
-	
+	return false;
+}
+
+function restartSystem() {
+	console.log("Restarting system");
+	server.close();
+	startServer();
+	showMenu();
+
+}
+
+function startServer() {
+	console.log("Starting server");
+	server = http.createServer(app).listen(8080);
 }
 
 function showMenu() {
@@ -104,7 +154,10 @@ function executeMenu(num) {
 				update();
 				break;
 			case 2:
-				readFromConfigFile();
+				changeInterval();
+				break;
+			case 3:
+				restartSystem();
 				break;
 			case 4: 
 				running = false;
@@ -118,8 +171,6 @@ function executeMenu(num) {
 }
 
 var dirName = "./";
-
-//readFeeds.generateFiles();
 
 var connect = require('connect');
 
@@ -165,7 +216,7 @@ var app  = connect()
 			}
 		});		
 	});
-http.createServer(app).listen(8080);
-var running = true;
+var server;
+startServer();
 showMenu();
 
