@@ -4,7 +4,19 @@
 
 var http = require('http');
 var fs = require('fs');
-//var readFeeds = require('./read_rss');
+var connect = require('connect');
+var path = require('path');
+var readline = require('readline');
+var readFeeds = require('./read_rss');
+
+var dirName = "./";
+var server;
+var rl = readline.createInterface({
+	input: process.stdin,
+	output: process.stdout
+});
+
+
 
 var updateInterval = new Date("October 1, 2013 12:00:00");
 var lastUpdated = new Date("October 31, 2013 12:53:00");
@@ -32,8 +44,7 @@ function writeToResponse(response, str) {
 function update() {
 	// Call update on read-rss.js
 	console.log("Updating...");
-	// set lastUpdated
-	//readFeeds.generateFiles();
+	readFeeds.generateFiles();
 	lastUpdated = new Date();
 	console.log("Updated database");
 }
@@ -95,7 +106,6 @@ function setInterval(newInterval) {
 
 function checkUpdate() {
 	var now = new Date();
-	var now2 = new Date();
 	
 	var nowDay = now.getDate();
 	var nowHours = now.getHours();
@@ -113,7 +123,6 @@ function checkUpdate() {
 	console.log(dayDiff + ":"  + hourDiff + ":" + minuteDiff);
 	if (hourDiff == decide)
 	{
-		console.log("Time to update");
 		return true;
 	} 
 	return false;
@@ -124,18 +133,21 @@ function restartSystem() {
 	server.close();
 	startServer();
 	showMenu();
-
 }
 
 function startServer() {
+	update();
 	console.log("Starting server");
 	server = http.createServer(app).listen(8080);
 }
 
 function showMenu() {
+	if(checkUpdate) {
+		update();
+	}
 	console.log("Welcome to highjinx furniture finder server");
 	console.log("Commands that can be entered");
-	console.log("1. Manual Update Database");
+	console.log("1. Manually Update Database");
 	console.log("2. Set interval to update");
 	console.log("3. Restart the server");
 	console.log("4. Exit");
@@ -170,17 +182,7 @@ function executeMenu(num) {
 	}
 }
 
-var dirName = "./";
 
-var connect = require('connect');
-
-var path = require('path');
-var readline = require('readline');
-
-var rl = readline.createInterface({
-	input: process.stdin,
-	output: process.stdout
-});
 
 var app  = connect()
 	
@@ -216,7 +218,6 @@ var app  = connect()
 			}
 		});		
 	});
-var server;
 startServer();
 showMenu();
 

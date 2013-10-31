@@ -12,6 +12,9 @@ connectionDetails['user'] = "user";
 connectionDetails['password'] = "password";
 connectionDetails['database'] = "highjinx-database";
 
+connectionDetails['user'] = "root";
+connectionDetails['password'] = "root";
+
 var pool = null;
 var connection = null;
 function createPool() {

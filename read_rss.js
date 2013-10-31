@@ -143,18 +143,29 @@ function generateHTML(objects, response) {
 	var fileName = "./index.html";
 	
 	var str = "<!DOCTYPE HTML>\n"
-				+"<html>\n"
-				+	"<head>\n"
-				+	'<link rel="stylesheet" type="text/css" href="style.css"/>'
-				+	"<title>Furniture Finder</title>\n"
-				+ "</head>"
-				+ "<body>";
+				+ "<html>\n"
+				+ "	<head>\n"
+				+ '		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.1/css/bootstrap.min.css">\n'
+				+ '		<link rel="stylesheet" href="css/bootstrap.min.css">\n'
+				+ '		<link rel="stylesheet" href="css/bootstrap-theme.min.css">'
+				+ '		<link rel="stylesheet" href="css/main.css">'
+				+ "		<title>Furniture Finder</title>\n"
+				+ "	</head>\n"
+				+ "	<body>\n"
+				+ '		<div class="col-sm-12 col-md-12">\n'
+				+ "			<h2>Highjinx Furniture Finder</h2>\n"
+				+ "		</div>\n";
 	for (var i = 0; i < objects.length; i++) {
 		var obj = objects[i];
-		var objStr = '<div class="item">\n' + "<h2>" + obj.getTitle() + "</h2>" + "<p>" + obj.getDescription() + "</p>" + '<a href="' + obj.getLink() + '">Link</a>' + "</div>\n";
+		var objStr =  '		<div class="col-sm-12 col-md-12 item">\n' 
+					+ "			<h3>" + obj.getTitle() + "</h3>\n" 
+					+ "			<p>" + obj.getDescription() + "</p>\n" 
+					+ '			<a href="' + obj.getLink() + '">Link</a>\n' 
+					+ "		</div>\n";
 		str = str + objStr;
 	}
-	var footer = "</body>\n</html>";
+	var footer = "	</body>\n"+
+				"</html>";
 	str = str + footer;
 	fs.writeFile(fileName, str, function(err) {
 		if (err) {
