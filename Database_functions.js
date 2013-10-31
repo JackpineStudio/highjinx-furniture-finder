@@ -106,6 +106,7 @@ exports.insertSingleItemIntoDatabase = function(object) {
 	if (connection == null) {
 		connectToDatabase();
 	}
+	connectToDatabase();
 	if (object != null) {
 		var sqlQuery = 'SELECT count(*) FROM SaleObjects WHERE link = ?';	
 		var query = connection.query(sqlQuery, [object.link]);
@@ -116,7 +117,7 @@ exports.insertSingleItemIntoDatabase = function(object) {
 		})
 		.on('end', function() {
 			if (count == 0) {
-				var sqlQuery = "INSERT into SaleObjects (title, link, description, imageLink) values(?, ?, ?, ?)";
+				var sqlQuery = "INSERT into SaleObjects (title, link, description, imageLink, dateAdded) values(?, ?, ?, ?, NOW())";
 				var query = connection.query(sqlQuery, [object.getTitle(), object.getLink(), object.getDescription(), object.getImage()]);
 				query.on('end' ,function() {
 					console.log("Succesfully inserted item into the database");
@@ -136,6 +137,7 @@ exports.insertSingleItemIntoDatabase = function(object) {
 exports.insertIntoDatabase = function(objects) {
 	if (connection == null)
 		connectToDatabase();
+	connectToDatabase();
 	var count = 0;	
 	if (objects != null) {
 		for (var i = 0; i < objects.length; i++) {
@@ -154,9 +156,10 @@ function checkCount(event, count, num) {
 /*
  * This function is for retrieving items from the database and load it into the passed objects array.
  */
-exports.getObjectsFromDatabase = function(objects, callback) {
+exports.getObjectsFromDatabase = function(objects, callback, callback2) {
 	if (connection == null)
 		connectToDatabase();
+	connectToDatabase();
 	var sqlQuery = 'SELECT * FROM SaleObjects ORDER BY dateAdded DESC';	
 	var query = connection.query(sqlQuery);
 	query
@@ -167,13 +170,17 @@ exports.getObjectsFromDatabase = function(objects, callback) {
 	.on('end', function() {
 		console.log("At the end objects contain " + objects.length);
 		connection.end();
-		callback(objects);
+		if (callback2)
+			callback(objects, callback2);
+		else 
+			callback(objects);
 	});	
 };
 
 exports.getObjectsFromDatabaseWithResponse = function(objects, callback, response) {
 	if (connection == null)
 		connectToDatabase();
+	connectToDatabase();
 	var sqlQuery = 'SELECT * FROM SaleObjects ORDER BY dateAdded DESC';	
 	var query = connection.query(sqlQuery);
 	query
@@ -192,9 +199,10 @@ exports.getObjectsFromDatabaseWithResponse = function(objects, callback, respons
  * This function is for updating the database. Given the interval (24).
  * The items that were added more than the given interval, are deleted.
  */
-exports.updateDatabase = function(callback, parameter) {
+exports.updateDatabase = function(callback, callback2) {
 	if (connection == null)
 		connectToDatabase();
+	connectToDatabase();
 	var count = -1;
 	var sqlQuery = 'SELECT count(*) FROM SaleObjects WHERE dateAdded < DATE_SUB(NOW(), INTERVAL 24 HOUR)';
 	var query = connection.query(sqlQuery);
@@ -203,11 +211,16 @@ exports.updateDatabase = function(callback, parameter) {
 		count = row['count(*)'];
 	})
 	.on ('end', function() {
-		if (count != 0)
-			deleteOldEntries(callback);
-		else {
+		if (count != 0) {
+			if (callback2)
+				deleteOldEntries(callback, callback2);
+			else
+				deleteOldEntries(callback);
+		}else {
 			console.log('No need to delete');
-			callback(parameter);
+			if (callback2)
+				callback(callback2);
+			callback();
 		}
 	});
 };
@@ -217,6 +230,7 @@ exports.updateDatabase = function(callback, parameter) {
 exports.addUpdate = function (){
 	if (connection == null)
 		connectToDatabase();
+	connectToDatabase();
 	var count = -1;
 	
 	var sqlQuery = "SELECT count(*) as totalCount FROM"
@@ -251,15 +265,19 @@ exports.addUpdate = function (){
 /*
  * This function is for deleting entries from the database that were added more than the given interval hours ago.
  */
-function deleteOldEntries(callback) {
+function deleteOldEntries(callback, callback2) {
 	if (connection == null)
 		connectToDatabase();
+	connectToDatabase();
 	var sqlQuery = 'DELETE FROM SaleObjects WHERE dateAdded < DATE_SUB(NOW(), INTERVAL 24 HOUR);';
 	var query = connection.query(sqlQuery);
 	query
 	.on('end', function() {
 		console.log("Done deleting from database");
-		callback();
+		if (callback2)
+			callback(callback2);
+		else
+			callback();
 	});
 };
 
@@ -267,7 +285,6 @@ function closeConnection() {
 	console.log("Closing connection");
 	if (connection != null) {
 		connection.end();
-		//connection = null;
 	}
 }
 

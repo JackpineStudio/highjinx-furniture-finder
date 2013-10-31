@@ -27,7 +27,7 @@ var total = -1;
  * Each rss item, if it is free creates a SaleObject.
  * The SaleObject(s) are then pushed into the items array.
  */
-function loadFeed(feed, callback, increment, passedCount) {
+function loadFeed(feed, callback2) {
 	var response = rss.parseURL(feed, function(articles) {
 		var count = 0;
 		for(var i = 0; i < articles.length; i++){
@@ -139,7 +139,7 @@ function print(objects) {
 	console.log("Loaded: " + objects.length + " items");
 }
 
-function generateHTML(objects, response) {
+function generateHTML(objects, callback2) {
 	var fileName = "./index.html";
 	
 	var str = "<!DOCTYPE HTML>\n"
@@ -157,6 +157,10 @@ function generateHTML(objects, response) {
 				+ "		</div>\n";
 	for (var i = 0; i < objects.length; i++) {
 		var obj = objects[i];
+		var img = "";
+		if (obj.getImage()!= "none") {
+			img = '			<img src="' + obj.getImage() + '"/>';
+		}
 		var objStr =  '		<div class="col-sm-12 col-md-12 item">\n' 
 					+ "			<h3>" + obj.getTitle() + "</h3>\n" 
 					+ "			<p>" + obj.getDescription() + "</p>\n" 
@@ -171,37 +175,26 @@ function generateHTML(objects, response) {
 		if (err) {
 			console.log(err);
 		} else {
-			console.log("Wrote to file")
+			console.log("Wrote to file " + fileName);
+			// Call at the end of the function
+			if (callback2)
+				callback2();
 		}
 	});
 	
 }
-
 function generateFile() {
 	var objects = new Array();
 	databaseHandler.getObjectsFromDatabase(objects, generateHTML);
+}
+function generateFileWithCallback(callback2) {
+	var objects = new Array();
+	databaseHandler.getObjectsFromDatabase(objects, generateHTML, callback2);
 }
 
 function generateScript(response) {
 	var objects = new Array();
 	databaseHandler.getObjectsFromDatabaseWithResponse(objects, generateHTML, response);
-}
-
-var http = require('http');
-
-var extensions = {".html" : "text/html", ".css" : "text/css" };
-
-function onRequest(request, response) {
-	var fileName = "index.html";
-	fs.readFile(fileName, "binary", function(err, file) {
-		response.writeHead(200);
-		response.write(file, "binary");
-		response.end();
-	});
-}
-
-function writeToResponse(response, str) {
-	response.write(str);
 }
 
 function checkCount(event, count, num) {
@@ -210,20 +203,14 @@ function checkCount(event, count, num) {
 	}
 }
 
-exports.generateFiles = function() {
-	generateFile();
+exports.generateFiles = function(callback) {
+	if (callback)
+		generateFileWithCallback(callback);
+	else 
+		generateFile();
 }
 
-var fn = 0;
-if (fn == 0)
-	generateFile();
-else if (fn == 1)
-	http.createServer(onRequest).listen(8888);
-else if (fn == 2) 
-	databaseHandler.updateDatabase(loadFeeds);
-else if (fn == 3) {
-	databaseHandler.insertIntoDatabase(objects);
-}else if (fn == 4) {
-	preLoadFeeds();
+exports.updateDatabase = function(callback2) {
+	databaseHandler.updateDatabase(loadFeeds, callback2);
 }
 

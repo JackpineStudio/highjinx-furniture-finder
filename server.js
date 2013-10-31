@@ -16,38 +16,9 @@ var rl = readline.createInterface({
 	output: process.stdout
 });
 
-
-
+//Default interval is set to 12 hours. 
 var updateInterval = new Date("October 1, 2013 12:00:00");
 var lastUpdated = new Date("October 31, 2013 12:53:00");
-
-function onRequest(request, response) {
-	var fileName = "index.html";
-	var cssFileName = "style.css";
-	fs.readFile(fileName, "binary", function(err, file) {
-		response.writeHead(200);
-		response.write(file, "binary");
-		response.end();
-	});
-	fs.readFile(cssFileName, "binary", function(err, file) {
-		response.writeHead(200);
-		response.write(cssFileName, "binary");
-		response.end();
-	});
-}
-
-function writeToResponse(response, str) {
-	response.write(str);
-}
-
-
-function update() {
-	// Call update on read-rss.js
-	console.log("Updating...");
-	readFeeds.generateFiles();
-	lastUpdated = new Date();
-	console.log("Updated database");
-}
 
 function readFromConfigFile() {
 	console.log("Reading from config file");
@@ -67,7 +38,6 @@ function changeConfigFile() {
 function changeInterval() {
 	rl.question("Enter an interval Days:Hours:Minutes: ", function(answer) {
 		var numbers = answer.split(":");
-		
 		var days = numbers[0];
 		var hours = numbers[1];
 		var minutes = numbers[2];
@@ -120,7 +90,6 @@ function checkUpdate() {
 	var minuteDiff = nowMinutes - lastUpdatedMinutes;
 
 	var decide = updateInterval.getHours();
-	console.log(dayDiff + ":"  + hourDiff + ":" + minuteDiff);
 	if (hourDiff == decide)
 	{
 		return true;
@@ -129,37 +98,48 @@ function checkUpdate() {
 }
 
 function restartSystem() {
-	console.log("Restarting system");
+	console.log("\nRestarting system");
 	server.close();
 	startServer();
 	showMenu();
 }
 
 function startServer() {
-	update();
-	console.log("Starting server");
+	lastUpdated = new Date();
+	console.log("\nStarting server");
 	server = http.createServer(app).listen(8080);
+	update();
 }
-
 function showMenu() {
-	if(checkUpdate) {
+	if(checkUpdate()) {
 		update();
 	}
-	console.log("Welcome to highjinx furniture finder server");
+	
+	console.log("\nWelcome to highjinx furniture finder server");
 	console.log("Commands that can be entered");
-	console.log("1. Manually Update Database");
-	console.log("2. Set interval to update");
-	console.log("3. Restart the server");
-	console.log("4. Exit");
-	rl.question("What would you like to do ? ", function(answer) {
+	console.log("	1. Manually Update Database");
+	console.log("	2. Set interval to update");
+	console.log("	3. Restart the server");
+	console.log("	4. Exit");
+	console.log("What would you like to do ?");
+	rl.question("Please enter a number: ", function(answer) {
 		executeMenu(answer);
 	});
 }
 
+function update() {
+	// Call update on read-rss.js
+	console.log("Updating database and the html file");
+	lastUpdated = new Date();
+	//readFeeds.updateDatabase();
+	readFeeds.generateFiles(showMenu);
+}
+
 function executeMenu(num) {
-	if (isNaN(num))
+	if (isNaN(num)) {
 		console.log("Please enter a number!");
-	else {
+		showMenu();
+	}else {
 		var number = parseInt(num);
 		switch(number) {
 			case 1: 
@@ -175,8 +155,9 @@ function executeMenu(num) {
 				running = false;
 				process.exit(code=0);
 				break;
-			case 5:
-				checkUpdate();
+			default:
+				console.log("Invalid selection");
+				showMenu();
 				break;
 		}
 	}
@@ -219,5 +200,5 @@ var app  = connect()
 		});		
 	});
 startServer();
-showMenu();
+//showMenu();
 
