@@ -1,5 +1,6 @@
 /**
  * server.js
+ * 
  */
 
 var http = require('http');
@@ -15,11 +16,20 @@ var rl = readline.createInterface({
 	input: process.stdin,
 	output: process.stdout
 });
-
+//Port number that the server listens for requests
+var port = 8080;
 //Default interval is set to 12 hours. 
 var updateInterval = new Date("October 1, 2013 12:00:00");
+// lastUpdated is always changed when server starts.
+// It will be set to the current date.
 var lastUpdated = new Date("October 31, 2013 12:53:00");
 
+/*
+* TODO: Finish the implementation
+* This function is reponsible for reading a config file for the server.
+* This file will mostly contain important information for the execution of the server.
+* The config file will contain database connection details and updateInterval
+*/
 function readFromConfigFile() {
 	console.log("Reading from config file");
 	try {
@@ -31,10 +41,17 @@ function readFromConfigFile() {
 	
 }
 
+/* TODO:Finish the implementation
+* This function will be responsible for changing the config file.
+*/
 function changeConfigFile() {
 
 }
 
+/*
+* This function is called when the user requests to change the interval. The default is 12 hours.
+* The user has to enter the new interval in DD:HH:MM format in which DD represents two digit days, HH represents hours and MM represents minutes.
+*/
 function changeInterval() {
 	rl.question("Enter an interval Days:Hours:Minutes: ", function(answer) {
 		var numbers = answer.split(":");
@@ -47,7 +64,11 @@ function changeInterval() {
 	
 }
 
-//DD:HH:MM
+/*
+* This function sets the interval to a new one.
+* arguments: 
+	- newInteval: Is a new dateObject
+*/
 function setInterval(newInterval) {
 	updateInterval = newInterval;
 
@@ -74,6 +95,11 @@ function setInterval(newInterval) {
 	showMenu();
 }
 
+
+/*
+* This function looks at the time difference between lastUpdated and now.
+* It will return true if the time difference is equal to the defined interval.
+*/
 function checkUpdate() {
 	var now = new Date();
 	
@@ -91,30 +117,37 @@ function checkUpdate() {
 
 	var decide = updateInterval.getHours();
 	if (hourDiff == decide)
-	{
 		return true;
-	} 
 	return false;
 }
 
+/*
+* This function is for restarting the server;
+*/
 function restartSystem() {
 	console.log("\nRestarting system");
 	server.close();
 	startServer();
-	showMenu();
 }
-
+/*
+* This function starts the server.
+* The server listens on the port 8080
+* Port number can be changed at the begining of this code by modifying the port variable.
+*/
 function startServer() {
 	lastUpdated = new Date();
 	console.log("\nStarting server");
-	server = http.createServer(app).listen(8080);
+	server = http.createServer(app).listen(port);
 	update();
 }
+
+/*
+* This function displays the menu selections for executing certain commands.
+*/
 function showMenu() {
 	if(checkUpdate()) {
 		update();
 	}
-	
 	console.log("\nWelcome to highjinx furniture finder server");
 	console.log("Commands that can be entered");
 	console.log("	1. Manually Update Database");
@@ -126,7 +159,10 @@ function showMenu() {
 		executeMenu(answer);
 	});
 }
-
+/*
+* Update function updates the database and generates a new html with the new entries added.
+* So far it only calls the function to generate the html file.
+*/
 function update() {
 	// Call update on read-rss.js
 	console.log("Updating database and the html file");
@@ -135,6 +171,9 @@ function update() {
 	readFeeds.generateFiles(showMenu);
 }
 
+/*
+* This function calls the appropriate menu item. 
+*/
 function executeMenu(num) {
 	if (isNaN(num)) {
 		console.log("Please enter a number!");
@@ -164,7 +203,11 @@ function executeMenu(num) {
 }
 
 
-
+/*
+* This is where the server side is set up.
+* The server serves the required html and css files.
+* It can be modified to server any file type. 
+*/
 var app  = connect()
 	
 	.use(connect.static(dirName + "index.html"))
@@ -200,5 +243,4 @@ var app  = connect()
 		});		
 	});
 startServer();
-//showMenu();
 
