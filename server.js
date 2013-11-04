@@ -212,7 +212,6 @@ var app  = connect()
 	
 	.use(connect.static(dirName + "index.html"))
 	.use(function(request, response) { 
-		
 		var filePath = '.' + request.url;
 		if (filePath == './')
 			filePath = './index.html';

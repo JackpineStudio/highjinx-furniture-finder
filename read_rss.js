@@ -23,6 +23,7 @@ var count = 0;
 var total = -1;
 
 /*
+ * TODO: Fix the infinite loop problem
  * This function loads rss feeds from the feeds array.
  * Each rss item, if it is free creates a SaleObject.
  * The SaleObject(s) are then pushed into the items array.
@@ -152,24 +153,38 @@ function generateHTML(objects, callback2) {
 				+ "		<title>Furniture Finder</title>\n"
 				+ "	</head>\n"
 				+ "	<body>\n"
-				+ '		<div class="col-sm-12 col-md-12">\n'
-				+ "			<h2>Highjinx Furniture Finder</h2>\n"
-				+ "		</div>\n";
+				+ '		<div class="col-sm-12 col-md-12 title">\n'
+				+ '			<h2>Highjinx Furniture Finder</h2>\n'
+				+ "		</div>\n"
+				+ '		<div class="container">\n';
+	var count = -1;
 	for (var i = 0; i < objects.length; i++) {
 		var obj = objects[i];
 		var img = "";
-		if (obj.getImage()!= "none") {
+		if (obj.getImage() != "none") {
 			img = '			<img src="' + obj.getImage() + '"/>';
 		}
-		var objStr =  '		<div class="col-sm-12 col-md-12 item">\n' 
-					+ "			<h3>" + obj.getTitle() + "</h3>\n" 
-					+ "			<p>" + obj.getDescription() + "</p>\n" 
-					+ '			<a href="' + obj.getLink() + '">Link</a>\n' 
-					+ "		</div>\n";
+		var objStr = "";
+		if (count == -1) {
+			objStr += '			<div class="row">\n';
+			count = 3;
+		}
+		objStr = objStr
+					+ '				<div class="col-sm-12 col-md-4 col-lg-4 item">\n' 
+					+ "					<h3>" + obj.getTitle() + "</h3>\n" 
+					+ "					<p>" + obj.getDescription() + "</p>\n" 
+					+ '					<a href="' + obj.getLink() + '">Link</a>\n' 
+					+ "				</div>\n";
+		count--;
+		if (count == 0) {
+			objStr += "			</div>\n";
+			count = -1;
+		}
 		str = str + objStr;
 	}
-	var footer = "	</body>\n"+
-				"</html>";
+	var footer = "		</div>\n" 
+				 "	</body>\n"+
+				 "</html>";
 	str = str + footer;
 	fs.writeFile(fileName, str, function(err) {
 		if (err) {
