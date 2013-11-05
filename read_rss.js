@@ -11,16 +11,43 @@ var rss = require('./js-plugins/node-rss'),
 	count = 0;
 	fs = require('fs');
 
-var events = require('events'),
-	util = require('util');
-var eventEmitter = new events.EventEmitter();
 
 var databaseHandler = require('./Database_functions');
 
-var finishedLoading = false;
-
 var count = 0;
 var total = -1;
+
+var end = new Date('13 Apr 2012 13:30:00');
+
+var _second = 1000;
+var _minute = _second * 60;
+var _hour = _minute * 60;
+var _day = _hour *24;
+var timer;
+var distance = -3406;
+var time = 3406;
+function showRemaining()
+{
+    var now = new Date();
+    distance = end - now;
+    console.log(time);
+    if (time < 0 ) {
+       // handle expiry here..
+       clearInterval( timer ); // stop the timer from continuing ..
+       time = 3406;
+       //alert('Expired'); // alert a message that the timer has expired..
+    }
+    time--;
+    
+    var days = Math.floor(distance / _day);
+    var hours = Math.floor( (distance % _day ) / _hour );
+    var minutes = Math.floor( (distance % _hour) / _minute );
+    var seconds = Math.floor( (distance % _minute) / _second );
+    var milliseconds = distance % _second;
+    
+}
+
+
 
 /*
  * TODO: Fix the infinite loop problem
@@ -29,7 +56,9 @@ var total = -1;
  * The SaleObject(s) are then pushed into the items array.
  */
 function loadFeed(feed, callback2) {
-	var response = rss.parseURL(feed, function(articles) {
+	
+	
+	rss.parseURL(feed, function(articles) {
 		var count = 0;
 		for(var i = 0; i < articles.length; i++){
 			var article = articles[i];
@@ -54,16 +83,19 @@ function loadFeed(feed, callback2) {
 				article.image = "none";
 			}
 			var object = new SaleObject(article.title, article.link, article.description, article.image);
-			count++;
+			
 			if (isFree(article.title)) {
 				items.push(object);
 				databaseHandler.insertSingleItemIntoDatabase(object);
 			}
-		}
+			
+		} 
 	});
-	/*if (databaseHandler != null) {
-		databaseHandler.addUpdate();
-	}*/
+}
+
+
+function insertFeeds(articles) {
+	
 }
 
 /*
@@ -116,25 +148,22 @@ function getImageLink(link) {
 }
 
 function loadFeeds(callback) {
-	eventEmitter.on('doneArticles', function() {
+	/*eventEmitter.on('doneArticles', function() {
 		console.log("Calling done");
 		console.log("Items length: " + items.length);
 		total = total + items.length;
 		databaseHandler.insertIntoDatabase(items);
 		items = new Array();
 	});
-	
+	*/
 	var totalCount = -1;
 	
 	for (var i = 0; i < feeds.length; i++) {
-		loadFeed(feeds[i], callback, false, totalCount);
+		loadFeed(feeds[i], callback);
 	}
 	
 }
 
-function emitEnd() {
-	eventEmitter.emit('end');
-}
 
 function print(objects) {
 	console.log("Loaded: " + objects.length + " items");
@@ -223,9 +252,12 @@ exports.generateFiles = function(callback) {
 		generateFileWithCallback(callback);
 	else 
 		generateFile();
-}
+};
 
-exports.updateDatabase = function(callback2) {
+function updateDatabase(callback2) {
 	databaseHandler.updateDatabase(loadFeeds, callback2);
 }
 
+exports.updateDatabase = function(callback2) {
+	updateDatabase(callback2);
+};

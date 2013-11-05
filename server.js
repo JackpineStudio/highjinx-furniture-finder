@@ -208,8 +208,7 @@ function executeMenu(num) {
 * The server serves the required html and css files.
 * It can be modified to server any file type. 
 */
-var app  = connect()
-	
+var app = connect()
 	.use(connect.static(dirName + "index.html"))
 	.use(function(request, response) { 
 		var filePath = '.' + request.url;
