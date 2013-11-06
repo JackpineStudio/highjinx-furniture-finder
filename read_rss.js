@@ -26,6 +26,7 @@ var _day = _hour *24;
 var timer;
 var distance = -3406;
 var time = 3406;
+
 function showRemaining()
 {
     var now = new Date();
@@ -169,8 +170,56 @@ function print(objects) {
 	console.log("Loaded: " + objects.length + " items");
 }
 
-function generateHTML(objects, callback2) {
+function createHTML(str, objects, callback2) {
 	var fileName = "./index.html";
+	var count = -1;
+	var size = objects.length;
+	size = 5;
+	var initArray = '\n\t\t\t<div ng-init="saleObjects= [\n';
+	for (var i = 0; i < size; i++) {
+		var obj = objects[i];
+		if ((obj.getDescription()).indexOf("\"") != -1) {
+			var arr = obj.getDescription().split("\"");
+			var desc = "";
+			for (var j = 0; j < arr.length; j++) 
+				desc += arr[j];
+			obj.setDescription(desc);
+		}
+		initArray += '\t\t\t\t{title:\'' + obj.getTitle() + '\',\n '
+				   + '\t\t\t\tdescription:\'' + obj.getDescription()  + '\',\n '
+				   + '\t\t\t\tlink:\'' +  obj.getLink() + '\'}';
+		if(i != (size -1)) {
+			initArray += ",\n";
+		} else {
+			initArray += ']">\n';
+		}
+		count--;
+		if (count == 0) {
+			objStr += "\t\t\t\t</div>\n";
+			count = -1;
+		}
+		//str = str + objStr;
+	}
+	str = str + initArray ;
+	var footer = "\n\t\t\t</div>\n" +
+				 "\t\t</div>\n" +
+				 "\t</body>\n"+
+				 "</html>";
+	str = str + footer;
+	fs.writeFile(fileName, str, function(err) {
+		if (err) {
+			console.log(err);
+		} else {
+			console.log("Wrote to file " + fileName);
+			// Call at the end of the function
+			if (callback2)
+				callback2();
+		}
+	});
+}
+
+function generateHTML(objects, callback2) {
+	
 	
 	var str = "<!DOCTYPE HTML>\n"
 				+ "<html>\n"
@@ -185,46 +234,22 @@ function generateHTML(objects, callback2) {
 				+ '		<div class="col-sm-12 col-md-12 title">\n'
 				+ '			<h2>Highjinx Furniture Finder</h2>\n'
 				+ "		</div>\n"
+				+ '		<div class="col-sm-12 col-md-12 title">\n'	
+				+ '			<input type="text"></input>'
+				+ '		</div>\n'
 				+ '		<div class="container">\n';
-	var count = -1;
-	for (var i = 0; i < objects.length; i++) {
-		var obj = objects[i];
-		var img = "";
-		if (obj.getImage() != "none") {
-			img = '			<img src="' + obj.getImage() + '"/>';
-		}
-		var objStr = "";
-		if (count == -1) {
-			objStr += '			<div class="row">\n';
-			count = 3;
-		}
-		objStr = objStr
-					+ '				<div class="col-sm-12 col-md-4 col-lg-4 item">\n' 
-					+ "					<h3>" + obj.getTitle() + "</h3>\n" 
-					+ "					<p>" + obj.getDescription() + "</p>\n" 
-					+ '					<a href="' + obj.getLink() + '">Link</a>\n' 
-					+ "				</div>\n";
-		count--;
-		if (count == 0) {
-			objStr += "			</div>\n";
-			count = -1;
-		}
-		str = str + objStr;
-	}
-	var footer = "		</div>\n" 
-				 "	</body>\n"+
-				 "</html>";
-	str = str + footer;
-	fs.writeFile(fileName, str, function(err) {
+	
+	fs.readFile('./sample.html', 'binary', function (err, data) {
 		if (err) {
-			console.log(err);
+			console.log('Error reading sample.html', err);
+			createHTML(str, objects, callback2);
 		} else {
-			console.log("Wrote to file " + fileName);
-			// Call at the end of the function
-			if (callback2)
-				callback2();
+			createHTML(data, objects, callback2);
+			
 		}
 	});
+	
+	
 	
 }
 function generateFile() {

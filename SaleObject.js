@@ -31,6 +31,10 @@ function SaleObject(title, link, description, image) {
 	this.setImage = function(src) {
 		this.image = src;
 	};
+	
+	this.setDescription = function(des) {
+		this.description = des;
+	};
 }
 
 module.exports = SaleObject;

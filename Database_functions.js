@@ -5,15 +5,25 @@
 
 var mysql = require('mysql');
 SaleObject = require('./SaleObject');
-
 var connectionDetails = {};
+
 connectionDetails['host'] = "127.0.0.1";
 connectionDetails['user'] = "root";
-connectionDetails['password'] = "071175";
+connectionDetails['password'] = "password";
 connectionDetails['database'] = "highjinx-database";
 
 var pool = null;
 var connection = null;
+
+exports.setConnectionDetails = function(settings) {
+	setConnectionDetails(settings);
+	log(0, 'New connection details ' + settings);
+};
+
+function setConnectionDetails(settings) {
+	connectionDetails = settings;
+}
+
 function createPool() {
 	if (pool == null) {
 		pool = mysql.createPool({
