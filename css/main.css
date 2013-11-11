@@ -6,8 +6,11 @@
 
 body {
 	/*margin: 20%;*/
-}
 
+}
+body * {
+	font-family: 'Karla', sans-serif;
+}
 .item h2 {
 	color : gray;
 }

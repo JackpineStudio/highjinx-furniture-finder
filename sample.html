@@ -7,23 +7,26 @@
 		<link rel="stylesheet" href="css/main.css">		
 		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.min.js"></script>
 		<title>Furniture Finder</title>
+		<link href='http://fonts.googleapis.com/css?family=Karla:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
 	</head>
 	<body>
 		<div class="col-sm-12 col-md-12 title">
 			<h2>Highjinx Furniture Finder</h2>
 		</div>
-		<div class="col-sm-12 col-md-12 title">
-			<input type="text" ng-model="searchBar" placeholder="Enter a name here">
-				<span class="glyphicon glyphicon-search"></span>
-			</input>
+		
+		<div class="container">
+			<div class="col-xs-12 col-sm-12 col-md-12 title input-group">
+				<input type="text" ng-model="searchBar" class="form-control" placeholder="Enter a name here">
+				<span class="input-group-addon glyphicon glyphicon-search"></span>
+			</div>
+			
 		</div>
 
-		
    		 <div class="container">
-   		 	<div class="col-sm-12 col-md-4 col-lg-4 item" ng-repeat="object in saleObjects | filter:searchBar">
+   		 	<div class="col-sm-12 col-md-4 col-lg-4 item" ng-repeat="object in saleObjects | filter:searchBar" >
    		 		<h3>{{object.title}}</h3>
    		 		<p>{{object.description}}</p>
-   		 		
+   		 		<a href = {{object.link}}>Link</a>
    		 	</div>
    		 </div>
    		 

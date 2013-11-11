@@ -39,8 +39,7 @@ function readFromConfigFile() {
 		console.log(JSON.parse(config));
 	}catch (err) {
 		console.log(err);
-	} 
-	
+	}
 }
 
 /* TODO:Finish the implementation
@@ -170,6 +169,7 @@ function update() {
 	console.log("Updating database and the html file");
 	lastUpdated = new Date();
 	//readFeeds.updateDatabase();
+	//readFeeds.updateDatabase(readFeeds.generateFiles, showMenu);
 	readFeeds.generateFiles(showMenu);
 }
 

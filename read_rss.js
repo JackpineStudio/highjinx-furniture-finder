@@ -44,8 +44,7 @@ function showRemaining()
     var hours = Math.floor( (distance % _day ) / _hour );
     var minutes = Math.floor( (distance % _hour) / _minute );
     var seconds = Math.floor( (distance % _minute) / _second );
-    var milliseconds = distance % _second;
-    
+    var milliseconds = distance % _second;    
 }
 
 
@@ -57,8 +56,6 @@ function showRemaining()
  * The SaleObject(s) are then pushed into the items array.
  */
 function loadFeed(feed, callback2) {
-	
-	
 	rss.parseURL(feed, function(articles) {
 		var count = 0;
 		for(var i = 0; i < articles.length; i++){
@@ -89,7 +86,6 @@ function loadFeed(feed, callback2) {
 				items.push(object);
 				databaseHandler.insertSingleItemIntoDatabase(object);
 			}
-			
 		} 
 	});
 }
@@ -115,7 +111,6 @@ function isFree(title) {
  * This function is for getting the image source by creating a get request with the link provided.
  * It first Kijiji's source's code. Not tested for other websites
  */
-
 function getImageLink(link) {
 	var request = require('request');
 	request.get(object.getLink(), function (error, response, body) {
@@ -165,7 +160,6 @@ function loadFeeds(callback) {
 	
 }
 
-
 function print(objects) {
 	console.log("Loaded: " + objects.length + " items");
 }
@@ -174,7 +168,7 @@ function createHTML(str, objects, callback2) {
 	var fileName = "./index.html";
 	var count = -1;
 	var size = objects.length;
-	size = 5;
+	//size = 5;
 	var initArray = '\n\t\t\t<div ng-init="saleObjects= [\n';
 	for (var i = 0; i < size; i++) {
 		var obj = objects[i];
@@ -184,6 +178,13 @@ function createHTML(str, objects, callback2) {
 			for (var j = 0; j < arr.length; j++) 
 				desc += arr[j];
 			obj.setDescription(desc);
+		} if ((obj.getDescription()).indexOf("\'") != -1 ) {
+			var arr = obj.getDescription().split("\'");
+			var desc = "";
+			for (var j = 0; j < arr.length; j++) 
+				desc += arr[j];
+			obj.setDescription(desc);
+			
 		}
 		initArray += '\t\t\t\t{title:\'' + obj.getTitle() + '\',\n '
 				   + '\t\t\t\tdescription:\'' + obj.getDescription()  + '\',\n '
@@ -220,24 +221,23 @@ function createHTML(str, objects, callback2) {
 
 function generateHTML(objects, callback2) {
 	
-	
 	var str = "<!DOCTYPE HTML>\n"
 				+ "<html>\n"
-				+ "	<head>\n"
-				+ '		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.1/css/bootstrap.min.css">\n'
-				+ '		<link rel="stylesheet" href="css/bootstrap.min.css">\n'
-				+ '		<link rel="stylesheet" href="css/bootstrap-theme.min.css">'
-				+ '		<link rel="stylesheet" href="css/main.css">'
-				+ "		<title>Furniture Finder</title>\n"
-				+ "	</head>\n"
-				+ "	<body>\n"
-				+ '		<div class="col-sm-12 col-md-12 title">\n'
-				+ '			<h2>Highjinx Furniture Finder</h2>\n'
-				+ "		</div>\n"
-				+ '		<div class="col-sm-12 col-md-12 title">\n'	
-				+ '			<input type="text"></input>'
-				+ '		</div>\n'
-				+ '		<div class="container">\n';
+				+ "\t<head>\n"
+				+ '\t\t<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.1/css/bootstrap.min.css">\n'
+				+ '\t\t<link rel="stylesheet" href="css/bootstrap.min.css">\n'
+				+ '\t\t<link rel="stylesheet" href="css/bootstrap-theme.min.css">'
+				+ '\t\t<link rel="stylesheet" href="css/main.css">'
+				+ "\t\t<title>Furniture Finder</title>\n"
+				+ "\t</head>\n"
+				+ "\t<body>\n"
+				+ '\t\t<div class="col-sm-12 col-md-12 title">\n'
+				+ '\t\t\t<h2>Highjinx Furniture Finder</h2>\n'
+				+ "\t\t</div>\n"
+				+ '\t\t<div class="col-sm-12 col-md-12 title">\n'	
+				+ '\t\t\t<input type="text"></input>'
+				+ '\t\t</div>\n'
+				+ '\t\t<div class="container">\n';
 	
 	fs.readFile('./sample.html', 'binary', function (err, data) {
 		if (err) {
@@ -248,9 +248,6 @@ function generateHTML(objects, callback2) {
 			
 		}
 	});
-	
-	
-	
 }
 function generateFile() {
 	var objects = new Array();

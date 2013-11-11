@@ -341,7 +341,7 @@ function deleteOldEntries(callback, callback2) {
 function closeConnection() {
 	log(0,"Closing connection");
 	if (connection != null) {
-		connection.end();
+		//connection.end();
 	}
 }
 
