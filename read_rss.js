@@ -10,8 +10,9 @@ var rss = require('./js-plugins/node-rss'),
 			 'http://www.usedottawa.com/index.rss?category=furniture'],
 	count = 0;
 	fs = require('fs');
-
-
+	events = require('events');
+	eventEmitter = new events.EventEmitter();
+	async = require('async');
 var databaseHandler = require('./Database_functions');
 
 var count = 0;
@@ -25,7 +26,7 @@ var _hour = _minute * 60;
 var _day = _hour *24;
 var timer;
 var distance = -3406;
-var time = 3406;
+var time = 50;
 
 function showRemaining()
 {
@@ -33,21 +34,15 @@ function showRemaining()
     distance = end - now;
     console.log(time);
     if (time < 0 ) {
-       // handle expiry here..
+    	// handle expiry here..
        clearInterval( timer ); // stop the timer from continuing ..
        time = 3406;
        //alert('Expired'); // alert a message that the timer has expired..
     }
     time--;
-    
-    var days = Math.floor(distance / _day);
-    var hours = Math.floor( (distance % _day ) / _hour );
-    var minutes = Math.floor( (distance % _hour) / _minute );
-    var seconds = Math.floor( (distance % _minute) / _second );
-    var milliseconds = distance % _second;    
+    console.log(time);
+ 
 }
-
-
 
 /*
  * TODO: Fix the infinite loop problem
@@ -56,8 +51,7 @@ function showRemaining()
  * The SaleObject(s) are then pushed into the items array.
  */
 function loadFeed(feed, callback2) {
-	rss.parseURL(feed, function(articles) {
-		var count = 0;
+	rss.parseURL(feed, function(articles) {	
 		for(var i = 0; i < articles.length; i++){
 			var article = articles[i];
 			if(article.description.indexOf("<table") != -1){
@@ -88,6 +82,7 @@ function loadFeed(feed, callback2) {
 			}
 		} 
 	});
+	
 }
 
 
@@ -152,15 +147,17 @@ function loadFeeds(callback) {
 		items = new Array();
 	});
 	*/
-	var totalCount = -1;
-	
-	for (var i = 0; i < feeds.length; i++) {
-		loadFeed(feeds[i], callback);
-	}
+	/*for (var i = 0; i < feeds.length; i++) {
+		loadFeed(feeds[i]);
+	}*/
+	items = new Array();
+	for (var i = 0; i < feeds.length; i++) 
+		loadFeed(feeds[i]);
 	
 }
 
 function print(objects) {
+	objects= items;
 	console.log("Loaded: " + objects.length + " items");
 }
 
@@ -172,23 +169,49 @@ function createHTML(str, objects, callback2) {
 	var initArray = '\n\t\t\t<div ng-init="saleObjects= [\n';
 	for (var i = 0; i < size; i++) {
 		var obj = objects[i];
-		if ((obj.getDescription()).indexOf("\"") != -1) {
-			var arr = obj.getDescription().split("\"");
+		if ((obj.getTitle()).indexOf("\"") != -1) {
+			while( (obj.getTitle()).indexOf("\"") != -1 ) {
+			var arr = obj.getTitle().split("\"");
 			var desc = "";
 			for (var j = 0; j < arr.length; j++) 
 				desc += arr[j];
-			obj.setDescription(desc);
-		} if ((obj.getDescription()).indexOf("\'") != -1 ) {
-			var arr = obj.getDescription().split("\'");
-			var desc = "";
-			for (var j = 0; j < arr.length; j++) 
-				desc += arr[j];
-			obj.setDescription(desc);
+			obj.setTitle(desc);
+			}
+		}
+		if ((obj.getTitle()).indexOf("\'") != -1 ) {
+			while( (obj.getTitle()).indexOf("\'") != -1 ) {
+				var arr = obj.getTitle().split("\'");
+				var desc = "";
+				for (var j = 0; j < arr.length; j++) 
+					desc += arr[j];
+				obj.setTitle(desc);
+			}
 			
 		}
+		if ((obj.getDescription()).indexOf("\"") != -1) {
+			while( (obj.getDescription()).indexOf("\"") != -1 ) {
+				var arr = obj.getDescription().split("\"");
+				var desc = "";
+				for (var j = 0; j < arr.length; j++) 
+					desc += arr[j];
+				obj.setDescription(desc);
+			}
+		}
+		if ((obj.getDescription()).indexOf("\'") != -1 ) {
+			while( (obj.getDescription()).indexOf("\'") != -1 ) {
+				var arr = obj.getDescription().split("\'");
+				var desc = "";
+				for (var j = 0; j < arr.length; j++) 
+					desc += arr[j];
+				obj.setDescription(desc);
+			}
+			
+		}
+		
 		initArray += '\t\t\t\t{title:\'' + obj.getTitle() + '\',\n '
 				   + '\t\t\t\tdescription:\'' + obj.getDescription()  + '\',\n '
 				   + '\t\t\t\tlink:\'' +  obj.getLink() + '\'}';
+		
 		if(i != (size -1)) {
 			initArray += ",\n";
 		} else {
@@ -282,4 +305,5 @@ function updateDatabase(callback2) {
 
 exports.updateDatabase = function(callback2) {
 	updateDatabase(callback2);
+	
 };

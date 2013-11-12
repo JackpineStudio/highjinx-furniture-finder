@@ -28,6 +28,10 @@ function SaleObject(title, link, description, image) {
 		return this.title + " \n" + this.link + " \n" + this.description + " \n" + this.image;// + " \n" + this.pubDate;
 	};
 	
+	this.setTitle = function(title) {
+		this.title = title;
+	}
+	
 	this.setImage = function(src) {
 		this.image = src;
 	};

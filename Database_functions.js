@@ -14,6 +14,7 @@ connectionDetails['database'] = "highjinx-database";
 
 var pool = null;
 var connection = null;
+var connectionMade = false;
 
 exports.setConnectionDetails = function(settings) {
 	setConnectionDetails(settings);
@@ -25,16 +26,20 @@ function setConnectionDetails(settings) {
 }
 
 function createPool() {
+	log(0, "Creating pool");
 	if (pool == null) {
 		pool = mysql.createPool({
 			host : connectionDetails['host'],
 			user : connectionDetails['user'],
 			password : connectionDetails['password'],
-			database : connectionDetails['database'],
+			database : connectionDetails['database']
+		});
+		pool.on('connection', function(connection){
+			//log(0, "Created pool succesfully!");
 		});
 	}
-	if (pool != null) 
-		console.log("Created pool succesfully!");
+
+		
 }
 
 /*
@@ -47,12 +52,14 @@ function connectToDatabase() {
 		host : connectionDetails['host'],
 		user : connectionDetails['user'],
 		password : connectionDetails['password'],
-		database : connectionDetails['database'],
+		database : connectionDetails['database']
 	});
 	connection.connect(function (err){
 		connection.on('err', function() {
 			log(-1,'Cannot connect to the database');
 		});
+		connectionMade = true;
+		connection.setMaxListeners(200);
 	});
 }
 /*
@@ -113,11 +120,7 @@ function exists(object) {
  *	count2 -  
  *	num - 
  */
-function insertSingleItemIntoDatabase(object) {
-	if (connection == null) {
-		connectToDatabase();
-	}
-	connectToDatabase();
+function insertSingleItemIntoDatabase(object, connection) {
 	if (object != null) {
 		var sqlQuery = 'SELECT count(*) FROM SaleObjects WHERE link = ?';
 		var query = connection.query(sqlQuery, [object.link]);
@@ -125,32 +128,28 @@ function insertSingleItemIntoDatabase(object) {
 		var count = -1;
 		query
 		.on('result', function(row){
-			count = row['count(*)'];
+			count = row['count(*)'];	
 		})
 		.on('end', function() {
 			if (count == 0) {
-				if (connection == null) {
-					connectToDatabase();
-				}
-				connectToDatabase();
 				var sqlQuery = "INSERT into SaleObjects (title, link, description, imageLink, dateAdded) values(?, ?, ?, ?, NOW())";
 				var query = connection.query(sqlQuery, [object.getTitle(), object.getLink(), object.getDescription(), object.getImage()]);
 				log(0, "Executing query '" + query.sql + "'");
 				query.on('end' ,function() {
-					log(0, "Succesfully inserted item into the database");
-				});	
+					log(0, "Succesfully inserted item into the database");	
+				});
 			}else {
 				log(0, "This item exists in the database " + count);	
 			}
-			
-		});	
-		closeConnection();
-	};
+			connection.end();
+		});
+	}
 }
 
 
 exports.insertSingleItemIntoDatabase = function(object) {
-	insertSingleItemIntoDatabase(object);
+	connectToDatabase();
+	insertSingleItemIntoDatabase(object, connection);
 };
 
 /*
@@ -158,21 +157,18 @@ exports.insertSingleItemIntoDatabase = function(object) {
  * arguments:
  *	 objects - Array of SaleObjects
  */
-function insertIntoDatabase(object) {
-	if (connection == null)
+function insertIntoDatabase(objects) {
+//	if (connection == null)
 		connectToDatabase();
-	connectToDatabase();
-	var count = 0;	
-	if (objects != null) {
 		for (var i = 0; i < objects.length; i++) {
 			var object = objects[i];
-			exports.insertSingleItemIntoDatabase(object, checkCount, count, objects.length);
+			insertSingleItemIntoDatabase(object, connection);
 		}
-	}
+		connection.end();	
 }
 
 exports.insertIntoDatabase = function(objects) {
-	insertIntoDatabase(object);
+	insertIntoDatabase(objects);
 };
 
 /*
@@ -238,10 +234,8 @@ exports.getObjectsFromDatabaseWithResponse = function(objects, callback, respons
  * The items that were added more than the given interval, are deleted.
  */
 function updateDatabase(callback, callback2) {
-	if (connection == null)
-		connectToDatabase();
-	connectToDatabase();
 	var count = -1;
+	
 	log(0, "Updating database");
 	var sqlQuery = 'SELECT count(*) FROM SaleObjects WHERE dateAdded < DATE_SUB(NOW(), INTERVAL 24 HOUR)';
 	var query = connection.query(sqlQuery);
@@ -251,23 +245,25 @@ function updateDatabase(callback, callback2) {
 		count = row['count(*)'];
 	})
 	.on ('end', function() {
+		connection.end();
 		if (count != 0) {
 			if (callback2)
 				deleteOldEntries(callback, callback2);
 			else
 				deleteOldEntries(callback);
 		}else {
-			closeConnection();
 			log(0, 'No need to delete from database');
 			if (callback2)
 				callback(callback2);
 			if (callback)
 				callback();
+			log(0, 'Done updating the database');
 		}
 		
 	});
 }
 exports.updateDatabase = function(callback, callback2) {
+	connectToDatabase();
 	updateDatabase(callback, callback2);
 };
 /*
@@ -318,9 +314,8 @@ exports.addUpdate = function (){
  * This function is for deleting entries from the database that were added more than the given interval hours ago.
  */
 function deleteOldEntries(callback, callback2) {
-	if (connection == null)
-		connectToDatabase();
 	connectToDatabase();
+	
 	log(0, "Deleting from the database");
 	var sqlQuery = 'DELETE FROM SaleObjects WHERE dateAdded < DATE_SUB(NOW(), INTERVAL 24 HOUR);';
 	var query = connection.query(sqlQuery);
@@ -328,7 +323,8 @@ function deleteOldEntries(callback, callback2) {
 	query
 	.on('end', function() {
 		log(0, "Done deleting from database");
-		closeConnection();
+		connection.end();
+		log(0, 'Done updating the database');
 		if (callback2)
 			callback(callback2);
 		else {
@@ -341,7 +337,8 @@ function deleteOldEntries(callback, callback2) {
 function closeConnection() {
 	log(0,"Closing connection");
 	if (connection != null) {
-		//connection.end();
+		connection.end();
+		connectionMade = false;
 	}
 }
 
@@ -361,4 +358,5 @@ function log(messageType, message) {
 	//Tue Nov 05 2013 10:31:18 GMT-0500 (EST):45
 	console.log(timeString + " " + type + " " + message);
 }
+
 
