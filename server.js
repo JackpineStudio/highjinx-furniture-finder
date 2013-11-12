@@ -10,7 +10,7 @@ var path = require('path');
 var readline = require('readline');
 var readFeeds = require('./read_rss');
 var databaseHandler = require('./Database_functions.js');
-var test = require('./test.js');
+//var test = require('./test.js');
 
 var dirName = "./";
 var server;

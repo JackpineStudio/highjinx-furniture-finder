@@ -207,7 +207,10 @@ function createHTML(str, objects, callback2) {
 			}
 			
 		}
-		
+		var title = obj.getTitle().replace(/[\|&;\$%@"<>\(\)\+,]/g, "");
+		var description = obj.getDescription().replace(/[\|&;\$%@"<>\(\)\+,]/g, "");
+		obj.setTitle(title);
+		obj.setDescription(description);
 		initArray += '\t\t\t\t{title:\'' + obj.getTitle() + '\',\n '
 				   + '\t\t\t\tdescription:\'' + obj.getDescription()  + '\',\n '
 				   + '\t\t\t\tlink:\'' +  obj.getLink() + '\'}';
