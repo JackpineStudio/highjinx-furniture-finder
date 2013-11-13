@@ -4,48 +4,23 @@
 
 var rss = require('./js-plugins/node-rss'),
 	SaleObject = require('./SaleObject'),
+	fs = require('fs'),
+	events = require('events'),
+	async = require('async'),
+	//databaseHandler = require('./Database_functions');
+	Logger = require('./logger');
 	items = new Array(),
 	feeds = ['http://ottawa.kijiji.ca/f-SearchAdRss?AdType=2&CatId=235&Location=1700184&PriceAlternative=3', 
 	         'http://ottawa.en.craigslist.ca/fua/index.rss',
 			 'http://www.usedottawa.com/index.rss?category=furniture'],
-	count = 0;
-	fs = require('fs');
-	events = require('events');
+	count = 0,
 	eventEmitter = new events.EventEmitter();
-	async = require('async');
-var databaseHandler = require('./Database_functions');
-
+	
 var count = 0;
 var total = -1;
-
-var end = new Date('13 Apr 2012 13:30:00');
-
-var _second = 1000;
-var _minute = _second * 60;
-var _hour = _minute * 60;
-var _day = _hour *24;
-var timer;
-var distance = -3406;
-var time = 50;
-
-function showRemaining()
-{
-    var now = new Date();
-    distance = end - now;
-    console.log(time);
-    if (time < 0 ) {
-    	// handle expiry here..
-       clearInterval( timer ); // stop the timer from continuing ..
-       time = 3406;
-       //alert('Expired'); // alert a message that the timer has expired..
-    }
-    time--;
-    console.log(time);
- 
-}
-
+var databaseHandler;
+var showMenuCallback = null;
 /*
- * TODO: Fix the infinite loop problem
  * This function loads rss feeds from the feeds array.
  * Each rss item, if it is free creates a SaleObject.
  * The SaleObject(s) are then pushed into the items array.
@@ -82,11 +57,6 @@ function loadFeed(feed, callback2) {
 			}
 		} 
 	});
-	
-}
-
-
-function insertFeeds(articles) {
 	
 }
 
@@ -139,17 +109,20 @@ function getImageLink(link) {
 }
 
 function loadFeeds(callback) {
-	/*eventEmitter.on('doneArticles', function() {
-		console.log("Calling done");
-		console.log("Items length: " + items.length);
-		total = total + items.length;
-		databaseHandler.insertIntoDatabase(items);
-		items = new Array();
-	});
-	*/
-	/*for (var i = 0; i < feeds.length; i++) {
-		loadFeed(feeds[i]);
-	}*/
+	var interval = 10 * 1000;
+	var intervalFn = setInterval(function(){
+		generateFile();
+		clearInterval(intervalFn);
+			if(callback) {
+			intervalFn = setInterval(function() {
+				if(showMenuCallback) {
+					console.log("\nDone\n");
+					showMenuCallback();
+				}
+				clearInterval(intervalFn);
+			}, interval);
+		}
+	}, interval);
 	items = new Array();
 	for (var i = 0; i < feeds.length; i++) 
 		loadFeed(feeds[i]);
@@ -165,8 +138,8 @@ function createHTML(str, objects, callback2) {
 	var fileName = "./index.html";
 	var count = -1;
 	var size = objects.length;
-	//size = 5;
 	var initArray = '\n\t\t\t<div ng-init="saleObjects= [\n';
+	
 	for (var i = 0; i < size; i++) {
 		var obj = objects[i];
 		if ((obj.getTitle()).indexOf("\"") != -1) {
@@ -217,27 +190,25 @@ function createHTML(str, objects, callback2) {
 		
 		if(i != (size -1)) {
 			initArray += ",\n";
-		} else {
-			initArray += ']">\n';
-		}
+		} 
 		count--;
 		if (count == 0) {
 			objStr += "\t\t\t\t</div>\n";
 			count = -1;
 		}
-		//str = str + objStr;
 	}
 	str = str + initArray ;
-	var footer = "\n\t\t\t</div>\n" +
+	var footer = ']">\n' +
+				 "\n\t\t\t</div>\n" +
 				 "\t\t</div>\n" +
 				 "\t</body>\n"+
 				 "</html>";
 	str = str + footer;
 	fs.writeFile(fileName, str, function(err) {
 		if (err) {
-			console.log(err);
+			Logger.log(1, err);
 		} else {
-			console.log("Wrote to file " + fileName);
+			Logger.log(0, "Wrote to file " + fileName);
 			// Call at the end of the function
 			if (callback2)
 				callback2();
@@ -267,21 +238,27 @@ function generateHTML(objects, callback2) {
 	
 	fs.readFile('./sample.html', 'binary', function (err, data) {
 		if (err) {
-			console.log('Error reading sample.html', err);
+			Logger.log(1, 'Error reading sample.html', err);
 			createHTML(str, objects, callback2);
 		} else {
 			createHTML(data, objects, callback2);
 			
 		}
-	});
+	});	
 }
 function generateFile() {
+	var interval = 2 * 1000;
+	var intervalFn = setInterval(function(){
+		showMenuCallback();
+		clearInterval(intervalFn);
+	}, interval);
 	var objects = new Array();
 	databaseHandler.getObjectsFromDatabase(objects, generateHTML);
 }
-function generateFileWithCallback(callback2) {
+function generateFileWithCallback(callback, calback2) {
 	var objects = new Array();
-	databaseHandler.getObjectsFromDatabase(objects, generateHTML, callback2);
+	callback2();
+	databaseHandler.getObjectsFromDatabase(objects, generateHTML, callback);
 }
 
 function generateScript(response) {
@@ -295,18 +272,26 @@ function checkCount(event, count, num) {
 	}
 }
 
-exports.generateFiles = function(callback) {
+exports.generateFiles = function(callback, callback2) {
 	if (callback)
-		generateFileWithCallback(callback);
+		generateFileWithCallback(callback, callback2);
 	else 
 		generateFile();
 };
 
-function updateDatabase(callback2) {
-	databaseHandler.updateDatabase(loadFeeds, callback2);
+
+function updateDatabase(callback2, callback3) {
+	databaseHandler.updateDatabase(callback2, callback3);
 }
 
-exports.updateDatabase = function(callback2) {
-	updateDatabase(callback2);
-	
+
+exports.updateDatabase = function(callback2, callback3, callback4) {
+	showMenuCallback = callback4;
+	updateDatabase(loadFeeds, callback3);
 };
+
+exports.setDatabaseHandler = function(handler) {
+	databaseHandler = handler;
+};
+
+

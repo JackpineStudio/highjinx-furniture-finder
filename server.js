@@ -3,14 +3,14 @@
  * 
  */
 
-var http = require('http');
-var fs = require('fs');
-var connect = require('connect');
-var path = require('path');
-var readline = require('readline');
-var readFeeds = require('./read_rss');
-var databaseHandler = require('./Database_functions.js');
-//var test = require('./test.js');
+var http = require('http'),
+	fs = require('fs'),
+	connect = require('connect'),
+	path = require('path'),
+	readline = require('readline'),
+	readFeeds = require('./read_rss'),
+	databaseHandler = require('./Database_functions.js'),
+	Logger = require('./logger');
 
 var dirName = "./";
 var server;
@@ -21,11 +21,11 @@ var rl = readline.createInterface({
 //Port number that the server listens for requests
 var port = 8080;
 //Default interval is set to 12 hours. 
-var updateInterval = new Date("October 1, 2013 12:00:00");
+var updateInterval = new Date("October 1, 2013 12:00:10");
 // lastUpdated is always changed when server starts.
 // It will be set to the current date.
 var lastUpdated = new Date("October 31, 2013 12:53:00");
-
+var intervalFn;
 /*
 * TODO: Finish the implementation
 * This function is reponsible for reading a config file for the server.
@@ -59,10 +59,14 @@ function changeInterval() {
 		var days = numbers[0];
 		var hours = numbers[1];
 		var minutes = numbers[2];
-		var newInterval = new Date("October " + days + " ,2013 " + hours + ":" + minutes + ":" + "00");
-		setInterval(newInterval);
+		console.log(days, hours, minutes);
+		var newInterval = new Date();
+		newInteval = updateInterval;
+		newInteval.setDate(days);
+		newInterval.setHours(hours, minutes, 0, 0);
+		console.log(newInterval);
+		setUpdateInterval(newInterval);
 	});
-	
 }
 
 /*
@@ -70,7 +74,7 @@ function changeInterval() {
 * arguments: 
 	- newInteval: Is a new dateObject
 */
-function setInterval(newInterval) {
+function setUpdateInterval(newInterval) {
 	updateInterval = newInterval;
 
 	var days = updateInterval.getDate();
@@ -117,9 +121,10 @@ function checkUpdate() {
 	var minuteDiff = nowMinutes - lastUpdatedMinutes;
 
 	var decide = updateInterval.getHours();
-	if (hourDiff == decide)
-		return true;
-	return false;
+	decide = updateInterval.getMinutes();
+	if ( (hourDiff == updateInterval.getHours()) && (minuteDiff == updateInterval.getMinutes()))
+		update();
+	
 }
 
 /*
@@ -129,6 +134,7 @@ function restartSystem() {
 	console.log("\nRestarting system");
 	server.close();
 	startServer();
+	
 }
 /*
 * This function starts the server.
@@ -137,24 +143,27 @@ function restartSystem() {
 */
 function startServer() {
 	lastUpdated = new Date();
-	console.log("\nStarting server");
+	readFeeds.setDatabaseHandler(databaseHandler);
+	console.log("\nWelcome to highjinx furniture finder server");
 	server = http.createServer(app).listen(port);
 	update();
+	var interval = ((updateInterval.getMinutes() * 60) +
+			(updateInterval.getMinutes() * 60) + updateInterval.getSeconds()) * 1000;
+	intervalFn = setInterval(checkUpdate, interval);
+	
 }
 
 /*
 * This function displays the menu selections for executing certain commands.
 */
 function showMenu() {
-	if(checkUpdate()) {
-		update();
-	}
-	console.log("\nWelcome to highjinx furniture finder server");
+	
 	console.log("Commands that can be entered");
-	console.log("	1. Manually Update Database");
-	console.log("	2. Set interval to update");
-	console.log("	3. Restart the server");
-	console.log("	4. Exit");
+	console.log("	1. Manually update database");
+	console.log("	2. Update Html file");
+	console.log("	3. Set interval to update");
+	console.log("	4. Restart the server");
+	console.log("	5. Exit");
 	console.log("What would you like to do ?");
 	rl.question("Please enter a number: ", function(answer) {
 		executeMenu(answer);
@@ -165,12 +174,20 @@ function showMenu() {
 * So far it only calls the function to generate the html file.
 */
 function update() {
-	// Call update on read-rss.js
 	console.log("Updating database and the html file");
 	lastUpdated = new Date();
-	//readFeeds.updateDatabase();
-	//readFeeds.updateDatabase(readFeeds.generateFiles, showMenu);
-	readFeeds.generateFiles(showMenu);
+	databaseUpdate = new Date();
+	readFeeds.updateDatabase(readFeeds.loadFeeds, readFeeds.generateFiles, showMenu);
+}
+
+function updateHtmlFile() {
+	readFeeds.generateFiles();
+}
+
+function stop() {
+	running = false;
+	clearInterval(intervalFn);
+	process.exit(code=0);
 }
 
 /*
@@ -187,14 +204,16 @@ function executeMenu(num) {
 				update();
 				break;
 			case 2:
-				changeInterval();
+				updateHtmlFile();
 				break;
 			case 3:
+				changeInterval();
+				break;
+			case 4:
 				restartSystem();
 				break;
-			case 4: 
-				running = false;
-				process.exit(code=0);
+			case 5: 
+				stop();
 				break;
 			default:
 				console.log("Invalid selection");

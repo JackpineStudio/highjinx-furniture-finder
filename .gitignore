@@ -10,3 +10,7 @@ server.cfg
 server-config.json
 
 server.cfg
+
+logFile.log
+
+node_modules/.bin/bunyan

@@ -30,7 +30,7 @@ function SaleObject(title, link, description, image) {
 	
 	this.setTitle = function(title) {
 		this.title = title;
-	}
+	};
 	
 	this.setImage = function(src) {
 		this.image = src;
