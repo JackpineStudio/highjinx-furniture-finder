@@ -59,13 +59,11 @@ function changeInterval() {
 		var days = numbers[0];
 		var hours = numbers[1];
 		var minutes = numbers[2];
-		console.log(days, hours, minutes);
 		var newInterval = new Date();
 		newInteval = updateInterval;
 		newInteval.setDate(days);
 		newInterval.setHours(hours, minutes, 0, 0);
-		console.log(newInterval);
-		setUpdateInterval(newInterval);
+		setUpdateInterval(newInterval, days);
 	});
 }
 
@@ -74,12 +72,13 @@ function changeInterval() {
 * arguments: 
 	- newInteval: Is a new dateObject
 */
-function setUpdateInterval(newInterval) {
+function setUpdateInterval(newInterval, actualDays) {
 	updateInterval = newInterval;
 
 	var days = updateInterval.getDate();
+	days = actualDays;
 	var hours = updateInterval.getHours();
-	var minutes = updateInterval.getMinutes()
+	var minutes = updateInterval.getMinutes();
 	
 	var dayString = " day";
 	var hourString = " hour";

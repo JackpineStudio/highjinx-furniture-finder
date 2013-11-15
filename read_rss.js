@@ -5,16 +5,13 @@
 var rss = require('./js-plugins/node-rss'),
 	SaleObject = require('./SaleObject'),
 	fs = require('fs'),
-	events = require('events'),
-	async = require('async'),
-	//databaseHandler = require('./Database_functions');
+	databaseHandler = require('./Database_functions');
 	Logger = require('./logger');
 	items = new Array(),
 	feeds = ['http://ottawa.kijiji.ca/f-SearchAdRss?AdType=2&CatId=235&Location=1700184&PriceAlternative=3', 
 	         'http://ottawa.en.craigslist.ca/fua/index.rss',
 			 'http://www.usedottawa.com/index.rss?category=furniture'],
-	count = 0,
-	eventEmitter = new events.EventEmitter();
+	count = 0;
 	
 var count = 0;
 var total = -1;
@@ -27,7 +24,11 @@ var showMenuCallback = null;
  */
 function loadFeed(feed, callback2) {
 	rss.parseURL(feed, function(articles) {	
-		for(var i = 0; i < articles.length; i++){
+		for(var i = 0; i < (articles.length + 1); i++){
+			if (i == articles.length) {
+				getAll();
+				continue;
+			}
 			var article = articles[i];
 			if(article.description.indexOf("<table") != -1){
 				var desc = article.description;
@@ -102,10 +103,122 @@ function getImageLink(link) {
 					length++;
 			}	
 			src = subString.substr(startIndex, length);
+			
+			var object = new SaleObject(article.title, article.link, article.description, article.image);
+			
+			if (isFree(article.title)) {
+				items.push(object);
+				databaseHandler.insertSingleItemIntoDatabase(object);
+			}
+			
 		}else {
 			console.log("Error getting image");
 		}
 	});	
+}
+
+function getAll() {
+	var size = 14;
+	for (var i = 0; i < size; i++) {
+		getMore(i);
+	}
+}
+
+function getMore(pageNum) {
+	var link = 'http://ottawa.kijiji.ca/f-buy-and-sell-furniture-W0QQAdTypeZ2QQCatIdZ235QQPageZ';
+	//var pageNum = 1;
+	var end = 'QQPriceAlternativeZ3';
+	var request = require('request');
+	link = link + pageNum + end;
+	var numOfPages = -1;
+	request.get(link, function (error, response, body) {
+		var htmlparser = require('htmlparser2');
+		if(!error && response.statusCode == 200) {
+			var cvs = body;
+			var tagOpen = false;
+			var gettingCount = false;
+			var objectDetails = {};
+			objectDetails['title'] = "notSet";
+			objectDetails['link'] = "notSet";
+			objectDetails['description'] = "notSet";
+			objectDetails['image'] = " ";
+			var row = 0;
+			var resultRow = "resultRow" + row;
+			var item = 0;
+			var parser = new htmlparser.Parser({
+				onopentag: function(name, attribs) {
+					if (row == 20) {
+						return;
+					}
+					if(name == "tr" && attribs.id == resultRow) {
+						tagOpen = true;
+						item = 0;
+					} 
+					if (name =="a" && tagOpen) {
+						objectDetails['link'] = attribs.href;
+					}
+					
+					if(name == "img" && tagOpen) {
+						objectDetails['image'] = attribs.src;
+						
+					}
+					if (name == "span" && attribs.class == "titlecount") {
+						gettingCount = true;
+					}
+				},
+				ontext: function(text) {
+					if(tagOpen) {
+						item++;
+						var arr = text.split("\r\n");	
+						if(text.search("/^[a-zA-z]+$/") === -1) {
+							if(item == 11) {
+								if(text != "\r\n")
+									objectDetails['title'] = text;
+							} else if(item == 13) {
+								if(objectDetails['title'] == "notSet")
+									objectDetails['title'] = text;
+								else 
+									objectDetails['description'] = text;
+							} else if (item == 15) {
+								if(arr[1].indexOf("\r\n") == -1) {
+									if(objectDetails['description'] == "notSet") {
+										objectDetails['description'] = text;
+									}
+								}	
+							}
+						}
+					}
+					if (gettingCount ) {
+						var startIndex = text.indexOf("(");
+						var endIndex = text.indexOf(")");
+						if((startIndex != -1 ) && (endIndex != -1)) {
+							var count = text.substr(startIndex+1, (endIndex-1));
+							count = parseInt(count);
+							numOfPages  = Math.ceil((count / 20)) ;
+							gettingCount = false;
+						}
+					}
+				},
+				onclosetag :function(tagname) {
+					if(tagname == "tr" && tagOpen) {
+						tagOpen = false;
+						item = 0;
+						var object = new SaleObject(objectDetails['title'], objectDetails['link'], objectDetails['description'], objectDetails['image']);
+						databaseHandler.insertSingleItemIntoDatabase(object);
+						row++;
+						resultRow = "resultRow" + row;		
+						objectDetails['title'] = "notSet";
+						objectDetails['link'] = "notSet";
+						objectDetails['description'] = "notSet";
+						objectDetails['image'] = " ";
+					} 
+				}
+			});
+			parser.write(cvs);
+			parser.end();
+		
+		}
+	});
 }
 
 function loadFeeds(callback) {
@@ -249,7 +362,8 @@ function generateHTML(objects, callback2) {
 function generateFile() {
 	var interval = 2 * 1000;
 	var intervalFn = setInterval(function(){
-		showMenuCallback();
+		if(showMenuCallback)
+			showMenuCallback();
 		clearInterval(intervalFn);
 	}, interval);
 	var objects = new Array();
@@ -293,5 +407,4 @@ exports.updateDatabase = function(callback2, callback3, callback4) {
 exports.setDatabaseHandler = function(handler) {
 	databaseHandler = handler;
 };
-
 
