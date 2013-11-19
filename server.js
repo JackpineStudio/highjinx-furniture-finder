@@ -10,7 +10,7 @@ var http = require('http'),
 	readline = require('readline'),
 	readFeeds = require('./read_rss'),
 	databaseHandler = require('./Database_functions.js'),
-	Logger = require('./logger');
+	Logger = require('./Logger.js')
 
 var dirName = "./";
 var server;
