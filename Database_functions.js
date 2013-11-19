@@ -330,7 +330,7 @@ function deleteOldEntries(callback, callback2) {
 function closeConnection() {
 	Logger.log(0,"Closing connection");
 	if (connection != null) {
-		// connection.end();
+		connection.end();
 		connectionMade = false;
 	}
 }
@@ -339,5 +339,8 @@ exports.closeConnection = function() {
 	closeConnection();
 };
 
+exports.openConnection = function() {
+	connectToDatabase();
+};
 connectToDatabase();
 

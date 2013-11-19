@@ -6,7 +6,7 @@ var rss = require('./js-plugins/node-rss'),
 	SaleObject = require('./SaleObject'),
 	fs = require('fs'),
 	databaseHandler = require('./Database_functions');
-	Logger = require('./logger');
+	Logger = require('./Logger.js');
 	items = new Array(),
 	feeds = ['http://ottawa.kijiji.ca/f-SearchAdRss?AdType=2&CatId=235&Location=1700184&PriceAlternative=3', 
 	         'http://ottawa.en.craigslist.ca/fua/index.rss',
@@ -120,7 +120,13 @@ function getImageLink(link) {
 function getAll() {
 	var size = 14;
 	for (var i = 0; i < size; i++) {
-		getMore(i);
+		try {
+			getMore(i);
+		} catch (e) {
+			//maybe try after a while
+			console.log(e);
+			break;
+		}
 	}
 }
 
@@ -299,6 +305,7 @@ function createHTML(str, objects, callback2) {
 		obj.setDescription(description);
 		initArray += '\t\t\t\t{title:\'' + obj.getTitle() + '\',\n '
 				   + '\t\t\t\tdescription:\'' + obj.getDescription()  + '\',\n '
+				   + '\t\t\t\imageLink:\'' + obj.getImage()  + '\',\n '
 				   + '\t\t\t\tlink:\'' +  obj.getLink() + '\'}';
 		
 		if(i != (size -1)) {

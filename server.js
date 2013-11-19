@@ -172,14 +172,26 @@ function showMenu() {
 * Update function updates the database and generates a new html with the new entries added.
 * So far it only calls the function to generate the html file.
 */
+
+function databaseConnection() {
+	databaseHandler.openConnection();
+	var interval = 15 * 1000;
+	var intervalFn2 = setInterval(function(){
+		databaseHandler.closeConnection();
+		clearInterval(intervalFn2);
+	}, interval);
+}
+
 function update() {
 	console.log("Updating database and the html file");
 	lastUpdated = new Date();
 	databaseUpdate = new Date();
+	databaseConnection();
 	readFeeds.updateDatabase(readFeeds.loadFeeds, readFeeds.generateFiles, showMenu);
 }
 
 function updateHtmlFile() {
+	databaseConnection();
 	readFeeds.generateFiles();
 }
 

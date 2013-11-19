@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html ng-app>
 	<head>
-		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.1/css/bootstrap.min.css">
+		<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.1/css/bootstrap.min.css">
 		<link rel="stylesheet" href="css/bootstrap.min.css">
 		<link rel="stylesheet" href="css/bootstrap-theme.min.css">		
 		<link rel="stylesheet" href="css/main.css">		
@@ -19,14 +19,25 @@
 				<input type="text" ng-model="searchBar" class="form-control" placeholder="Enter a name here">
 				<span class="input-group-addon glyphicon glyphicon-search"></span>
 			</div>
-			
 		</div>
 
    		 <div class="container">
    		 	<div class="col-sm-12 col-md-4 col-lg-4 item" ng-repeat="object in saleObjects | filter:searchBar" >
-   		 		<h3>{{object.title}}</h3>
-   		 		<p>{{object.description}}</p>
-   		 		<a href = {{object.link}}>Link</a>
+   		 		<div class="row">
+   		 				<div class="col-md-3">
+							<img class="thumbnail" src = {{object.imageLink}}>
+						</div>
+						<div class="col-md-9">	
+							<a href = {{object.link}}>
+								<h3>{{object.title}}</h3>
+							</a>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<p>{{object.description}}</p>
+						</div>
+					</div>
    		 	</div>
    		 </div>
    		 
