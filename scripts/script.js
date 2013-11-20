@@ -1,4 +1,4 @@
-$(function() { 
+$(document).ready(function() { 
 	$numOfItems = 15;
 	$currentIndex = 6;
 	$currentPage = 1;
@@ -22,6 +22,18 @@ $(function() {
 						$(this).fadeIn("slow", function() {});	
 					} 
 				}
+			});
+		}
+	});
+	
+	$(".form-control").on('input', function() {
+		if($(this).val() == "") {
+			$("div").each(function() {
+			if($(this).hasClass("item")) {
+				if(this.id > ($numOfItems)) {
+					$(this).hide();	
+				} 
+			}
 			});
 		}
 	});
