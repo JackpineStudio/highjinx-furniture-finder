@@ -6,8 +6,12 @@
 		<link rel="stylesheet" href="css/bootstrap-theme.min.css">		
 		<link rel="stylesheet" href="css/main.css">		
 		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.min.js"></script>
+		<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
 		<title>Furniture Finder</title>
 		<link href='http://fonts.googleapis.com/css?family=Karla:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
+		<script type="text/javascript" src="script.js">
+
+		</script>
 	</head>
 	<body>
 		<div class="col-sm-12 col-md-12 title">
@@ -21,8 +25,8 @@
 			</div>
 		</div>
 
-   		 <div class="container">
-   		 	<div class="col-sm-12 col-md-4 col-lg-4 item" ng-repeat="object in saleObjects | filter:searchBar" >
+   		 <div class="container items">
+   		 	<div class="col-sm-12 col-md-4 col-lg-4 item" id="{{$index}}" ng-repeat="object in saleObjects | filter:searchBar" >
    		 		<div class="row">
    		 				<div class="col-md-3">
 							<img class="thumbnail" src = {{object.imageLink}}>
