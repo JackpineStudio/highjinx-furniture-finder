@@ -1,6 +1,6 @@
 $(document).ready(function() { 
 	$numOfItems = 15;
-	$currentIndex = 6;
+	$currentIndex = 4;
 	$currentPage = 1;
 	$("div").each(function() {
 			if($(this).hasClass("item")) {

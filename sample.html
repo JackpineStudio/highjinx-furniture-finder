@@ -9,11 +9,10 @@
 		<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
 		<title>Furniture Finder</title>
 		<link href='http://fonts.googleapis.com/css?family=Karla:400,400italic,700,700italic' rel='stylesheet' type='text/css'>
-		<script type="text/javascript" src="scripts/script.js">
-
-		</script>
+		<script type="text/javascript" src="scripts/script.js"></script>
+		<script src="scripts/angular.js"></script>
 	</head>
-	<body>
+	<body ng-controller ="MyController">
 		<div class="col-sm-12 col-md-12 title">
 			<h2>Highjinx Furniture Finder</h2>
 		</div>
@@ -26,22 +25,58 @@
 		</div>
 
    		 <div class="container items">
-   		 	<div class="col-sm-12 col-md-4 col-lg-4 item" id="{{$index}}" ng-repeat="object in saleObjects | filter:searchBar" >
-   		 		<div class="row">
-   		 				<div class="col-md-3">
-							<img class="thumbnail" src = {{object.imageLink}}>
-						</div>
-						<div class="col-md-9">	
-							<a href = {{object.link}}>
-								<h3>{{object.title}}</h3>
-							</a>
-						</div>
+   		 	<div class="row" ng-repeat="arrayItem in array | filter:searchBar">
+   		 		<div class="col-sm-12 col-md-4 col-lg-4 item" id="{{($index * 3)}}">
+	   		 		<div class="row">
+	   		 				<div class="col-md-3">
+								<img class="thumbnail" src = {{arrayItem[0].imageLink}}>
+							</div>
+							<div class="col-md-9">	
+								<a href = {{arrayItem[0].link}}>
+									<h3>{{arrayItem[0].title}}</h3>
+								</a>
+							</div>
 					</div>
 					<div class="row">
 						<div class="col-md-12">
-							<p>{{object.description}}</p>
+							<p>{{arrayItem[0].description}}</p>
 						</div>
 					</div>
+	   		 	</div>
+	   		 	<div class="col-sm-12 col-md-4 col-lg-4 item" id="{{($index * 3)+1}}">
+	   		 		<div class="row">
+	   		 				<div class="col-md-3">
+								<img class="thumbnail" src = {{arrayItem[1].imageLink}}>
+							</div>
+							<div class="col-md-9">	
+								<a href = {{arrayItem[1].link}}>
+									<h3>{{arrayItem[1].title}}</h3>
+								</a>
+							</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<p>{{arrayItem[1].description}}</p>
+						</div>
+					</div>
+	   		 	</div>
+	   		 	<div class="col-sm-12 col-md-4 col-lg-4 item" id="{{($index * 3)+2}}">
+	   		 		<div class="row">
+	   		 				<div class="col-md-3">
+								<img class="thumbnail" src = {{arrayItem[2].imageLink}}>
+							</div>
+							<div class="col-md-9">	
+								<a href = {{arrayItem[2].link}}>
+									<h3>{{arrayItem[2].title}}</h3>
+								</a>
+							</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<p>{{arrayItem[2].description}}</p>
+						</div>
+					</div>
+	   		 	</div>
    		 	</div>
    		 </div>
    		 
