@@ -21,6 +21,8 @@ body * {
 .item h3 {
 	font-size: 19px;
 	color: black;
+	position: relative;
+	left: -12px;
 }
 
 .title {
@@ -28,11 +30,15 @@ body * {
     padding-bottom : 30px;
 }
 
+.item {
+	margin: 10px 0;
+}
+
 .thumbnail {
 	width: 66;
-	/*height: 50;*/
 	text-align: center;
-
+	position: relative;
+	top: 17px;
 	
 }
 

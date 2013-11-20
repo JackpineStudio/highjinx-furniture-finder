@@ -5,7 +5,6 @@ function MyController($scope) {
 		$compSet = [];
 		$count = 0;
 		angular.forEach($scope.saleObjects, function(item) {
-			console.log($count);
 			if (($count % 3 == 0) && $count != 0) {
 				$scope.array.push($compSet);
 				$compSet = [];
