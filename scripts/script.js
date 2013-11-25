@@ -29,11 +29,11 @@ $(document).ready(function() {
 	$(".form-control").on('input', function() {
 		if($(this).val() == "") {
 			$("div").each(function() {
-			if($(this).hasClass("item")) {
-				if(this.id >= ($numOfItems)) {
-					$(this).hide();	
-				} 
-			}
+				if($(this).hasClass("item")) {
+					if(this.id >= ($numOfItems)) {
+						$(this).hide();	
+					} 
+				}
 			});
 		}
 	});

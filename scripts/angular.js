@@ -14,6 +14,13 @@ function MyController($scope) {
 		})
 		
 	});
+
+	$scope.filterFn = function(text) {
+		$scope.arr = [];
+		$scope.arr.push(text[0]);
+		console.log($scope.saleObjects);
+		return $scope.arr;
+	};
 	
 }
 
