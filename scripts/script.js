@@ -4,6 +4,8 @@ $(document).ready(function() {
 	$currentPage = 1;
 	$itemsDiv = $(".items");
 	$searchResults= $(".searchResults");
+	$searchMade = false;
+	$tempText = "no search";
 	$("div").each(function() {
 			if($(this).hasClass("item")) {
 				if(this.id >= ($numOfItems)) {
@@ -31,35 +33,24 @@ $(document).ready(function() {
 		}
 	});
 	
-	$(".form-control").on('input', function() {
-		if($(this).val() == "") {
-			$("div").each(function() {
-				if($(this).hasClass("searchRow")) {
-					$(this).remove();
-				} else if($(this).hasClass("item")) {
-					if(this.id >= ($numOfItems)) {
-						$(this).hide();	
-					} else {
-						$(this).show();
-					}
-				}
-			});
-			$itemsDiv.show();
-			$searchResults.hide();
-		}
-	});
+	$(".form-control").on('input', resetSearch);
 	$(".form-control").on('keypress', function(e) {
 		var p = e.which;
 		if (p == 13)
 			search();
 	});
-	$(".glyphicon-search").click(search);
+	$(".glyphicon-search").click(function() {
+			search();
+	});
 
 	function search() {
 		var input = $(".form-control").val();
-		$itemsDiv.hide();
-		$searchResults.show();
-		if (input != "") {
+		if ((input != "")  && (input != $tempText)) {
+			removeResults();
+			$itemsDiv.hide();
+			$searchResults.show();
+			$tempText = input;
+			$searchMade = true;
 			var count = 0; 
 			var tempCount = 0;
 			$("div").each(function() {
@@ -84,7 +75,6 @@ $(document).ready(function() {
 							$row.addClass("searchRow");
 						}
 						$(this).addClass("searchItem");
-						
 						$(this).show();
 						$row.append($(this).clone());
 						count++;
@@ -95,8 +85,35 @@ $(document).ready(function() {
 				}
 			});
 			if (count % 3 != 0) {
-				//$searchResults.append("</div>");
+				$searchResults.append("</div>");
 			}
 		}
+	}
+
+	function resetSearch() {
+		if($(this).val() == "") {
+			$searchMade = false;
+			$("div").each(function() {
+				if($(this).hasClass("searchRow")) {
+					$(this).remove();
+				} else if($(this).hasClass("item")) {
+					if(this.id >= ($numOfItems)) {
+						$(this).hide();	
+					} else {
+						$(this).show();
+					}
+				}
+			});
+			$itemsDiv.show();
+			$searchResults.hide();
+			$tempText = "no search";
+		}
+	}
+	function removeResults() {
+		$("div").each(function () {
+			if($(this).hasClass("searchRow")) {
+				$(this).remove();
+			}
+		});
 	}
 });
